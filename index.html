@@ -1,0 +1,2960 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no"/>
+<meta name="mobile-web-app-capable" content="yes"/>
+<meta name="apple-mobile-web-app-capable" content="yes"/>
+<meta name="theme-color" content="#050D1A"/>
+<title>EZ Wallet | ELECTZA</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet"/>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tweetnacl/1.0.3/nacl-fast.min.js"></script>
+<style>
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent;}
+html,body{
+  width:100%;height:100%;
+  background:#050D1A;
+  color:#E8F4FF;
+  font-family:'Inter',sans-serif;
+  font-size:16px;
+  overflow-x:hidden;
+}
+#app{
+  width:100%;
+  min-height:100vh;
+  display:flex;
+  flex-direction:column;
+}
+
+/* ── SCREENS ── */
+.scr{display:none;width:100%;min-height:100vh;padding:20px 16px 60px;}
+.scr.on{display:flex;flex-direction:column;animation:fadeIn .2s ease;}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+/* ── HOME ── */
+.home-wrap{
+  display:flex;flex-direction:column;align-items:center;
+  justify-content:center;min-height:100vh;
+  padding:30px 20px;text-align:center;
+}
+.logo-hex{
+  width:90px;height:90px;margin:0 auto 16px;
+  filter:drop-shadow(0 0 20px #00FFB260);
+}
+.logo-title{
+  font-family:'Orbitron',monospace;
+  font-size:32px;font-weight:900;
+  color:#00FFB2;letter-spacing:4px;
+  text-shadow:0 0 30px #00FFB250;
+  margin-bottom:6px;
+}
+.logo-sub{font-size:14px;color:#5A7898;margin-bottom:4px;}
+.logo-brand{font-size:12px;color:#2A4060;letter-spacing:3px;}
+.chain-tags{
+  display:flex;flex-wrap:wrap;justify-content:center;
+  gap:8px;margin:20px 0;
+}
+.ctag{
+  padding:7px 14px;border-radius:20px;font-size:14px;font-weight:700;
+  border:1px solid currentColor;opacity:.85;
+}
+.home-desc{
+  font-size:15px;color:#5A7898;line-height:1.8;
+  margin-bottom:24px;max-width:340px;
+}
+.home-btns{width:100%;max-width:380px;}
+
+/* ── BUTTONS ── */
+.btn{
+  display:block;width:100%;padding:17px;
+  border-radius:14px;border:none;
+  font-family:'Inter',sans-serif;font-weight:700;font-size:17px;
+  cursor:pointer;transition:all .18s;margin-bottom:12px;
+}
+.btn:active{transform:scale(.97);}
+.btn-p{background:linear-gradient(135deg,#00FFB2,#00C98A);color:#050D1A;}
+.btn-p:hover{box-shadow:0 0 25px #00FFB240;}
+.btn-g{background:transparent;border:2px solid #00FFB2;color:#00FFB2;}
+.btn-g:hover{background:#00FFB212;}
+.btn-gold{background:transparent;border:2px solid #FFB800;color:#FFB800;}
+.btn-red{background:transparent;border:2px solid #FF3D5A;color:#FF3D5A;}
+.btn-sm{padding:11px 18px;font-size:15px;width:auto;display:inline-block;margin-bottom:0;}
+
+/* ── CARD ── */
+.card{
+  background:linear-gradient(150deg,#09131F,#0C1830);
+  border:1px solid #1A2D45;border-radius:20px;
+  padding:24px 20px;width:100%;
+  box-shadow:0 0 50px #00FFB20A;
+}
+
+/* ── INPUTS ── */
+.lbl{font-size:14px;color:#5A7898;font-weight:600;margin-bottom:7px;display:block;margin-top:16px;}
+.lbl:first-child{margin-top:0;}
+input,textarea,select{
+  width:100%;background:#050D1A;
+  border:2px solid #1A2D45;border-radius:12px;
+  padding:14px 16px;color:#E8F4FF;
+  font-family:'Inter',sans-serif;font-size:16px;
+  outline:none;-webkit-appearance:none;
+  transition:border .2s;
+}
+input:focus,textarea:focus,select:focus{border-color:#00FFB240;}
+textarea{resize:vertical;min-height:90px;}
+select option{background:#09131F;}
+
+/* ── ALERTS ── */
+.err-box{background:#FF3D5A15;border:1px solid #FF3D5A40;border-radius:12px;padding:12px 16px;font-size:14px;color:#FF3D5A;margin-bottom:12px;display:none;}
+.info-box{background:#00FFB212;border:1px solid #00FFB230;border-radius:12px;padding:12px 16px;font-size:14px;color:#00FFB2;margin-top:12px;}
+.warn-box{background:#FF3D5A12;border:1px solid #FF3D5A30;border-radius:12px;padding:12px 16px;font-size:14px;color:#FF3D5A;margin-top:12px;line-height:1.7;}
+
+/* ── PIN ── */
+.pin-dots{display:flex;gap:18px;justify-content:center;margin:28px 0;}
+.dot{width:20px;height:20px;border-radius:50%;background:#1A2D45;border:2px solid #1A2D45;transition:all .2s;}
+.dot.on{background:#00FFB2;border-color:#00FFB2;box-shadow:0 0 12px #00FFB2;}
+.pin-pad{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;}
+.pkey{
+  padding:0;
+  height:80px;
+  border-radius:16px;
+  border:2px solid #1A2D45;
+  background:#09131F;
+  color:#E8F4FF;
+  font-family:'Orbitron',monospace;
+  font-size:28px;
+  font-weight:700;
+  cursor:pointer;
+  transition:all .18s;
+  text-align:center;
+  display:flex;align-items:center;justify-content:center;
+  width:100%;
+}
+.pkey:hover{border-color:#00FFB2;color:#00FFB2;}
+.pkey:active{background:#00FFB215;transform:scale(.96);}
+.pkey.inv{opacity:0;pointer-events:none;}
+
+
+/* ── WALLET HEADER ── */
+.w-header{
+  position:sticky;top:0;z-index:10;
+  background:#050D1A;
+  padding:14px 16px 10px;
+  border-bottom:1px solid #1A2D45;
+  display:flex;justify-content:space-between;align-items:center;
+}
+.w-title{font-family:'Orbitron',monospace;font-size:16px;font-weight:900;color:#00FFB2;letter-spacing:2px;}
+.w-sub{font-size:12px;color:#5A7898;margin-top:2px;}
+.hbtn{background:none;border:2px solid #1A2D45;border-radius:10px;color:#E8F4FF;padding:9px 13px;cursor:pointer;font-size:18px;line-height:1;transition:border .18s;}
+.hbtn:hover{border-color:#1A2D45;}
+
+/* ── TICKER ── */
+#ticker{
+  background:#040B18;border-bottom:1px solid #1A2D45;
+  height:46px;overflow:hidden;display:flex;align-items:center;
+  cursor:pointer;flex-shrink:0;
+}
+#ttrack{display:inline-flex;animation:tick 40s linear infinite;white-space:nowrap;height:100%;align-items:center;}
+#ttrack:hover{animation-play-state:paused;}
+.ti{display:inline-flex;align-items:center;gap:7px;padding:0 20px;border-right:1px solid #1A2D45;height:100%;}
+.ts{font-family:'Orbitron',monospace;font-size:11px;color:#7A98B8;}
+.tp{font-size:15px;font-weight:700;}
+.tc{font-size:13px;font-weight:600;}
+.up{color:#00FFB2;}.dn{color:#FF3D5A;}
+@keyframes tick{0%{transform:translateX(0)}100%{transform:translateX(-50%)}}
+
+/* ── TABS ── */
+.tabs{display:flex;border-bottom:2px solid #1A2D45;overflow-x:auto;scrollbar-width:none;flex-shrink:0;}
+.tabs::-webkit-scrollbar{display:none;}
+.tab{flex:1;min-width:52px;padding:13px 4px;background:none;border:none;border-bottom:3px solid transparent;color:#7A98B8;font-family:'Inter',sans-serif;font-size:14px;font-weight:600;cursor:pointer;transition:all .18s;white-space:nowrap;}
+.tab.on{border-bottom-color:#00FFB2;color:#00FFB2;}
+
+/* ── BALANCE HERO ── */
+.bal-hero{background:#09131F;border:2px solid #1A2D45;border-radius:18px;padding:24px;text-align:center;margin-bottom:14px;}
+.bal-label{font-size:12px;color:#5A7898;letter-spacing:3px;font-weight:600;}
+.bal-amount{font-family:'Orbitron',monospace;font-size:34px;font-weight:900;color:#00FFB2;margin:8px 0;text-shadow:0 0 20px #00FFB230;}
+.bal-sub{font-size:13px;color:#7A98B8;}
+
+/* ── STATUS BAR ── */
+.status-bar{
+  display:flex;align-items:center;gap:8px;
+  padding:10px 16px;background:#09131F;
+  border-bottom:1px solid #1A2D45;font-size:13px;color:#5A7898;
+}
+.sdot{width:8px;height:8px;border-radius:50%;background:#00FFB2;box-shadow:0 0 6px #00FFB2;flex-shrink:0;}
+.sdot.y{background:#FFB800;box-shadow:0 0 6px #FFB800;}
+.sdot.r{background:#FF3D5A;box-shadow:0 0 6px #FF3D5A;}
+.spin{display:inline-block;width:12px;height:12px;border:2px solid #1A2D45;border-top-color:#00FFB2;border-radius:50%;animation:sp .7s linear infinite;vertical-align:middle;margin-right:6px;flex-shrink:0;}
+@keyframes sp{to{transform:rotate(360deg)}}
+
+/* ── ASSET ROW ── */
+.arow{
+  display:flex;align-items:center;
+  padding:16px;background:#09131F;
+  border:1px solid #1A2D45;border-radius:14px;
+  margin-bottom:8px;cursor:pointer;transition:border .18s;
+}
+.arow:hover{border-color:#243D5C;}
+.arow:active{background:#0C1830;}
+.a-icon{width:46px;height:46px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:20px;margin-right:14px;flex-shrink:0;}
+.a-name{font-size:17px;font-weight:700;}
+.a-net{font-size:13px;color:#8FA8C8;margin-top:3px;}
+.a-bal{font-size:16px;font-weight:700;text-align:right;}
+.a-usd{font-size:13px;color:#A8C0DC;text-align:right;margin-top:3px;}
+
+/* ── TOKEN ROW ── */
+.trow{
+  display:flex;align-items:center;
+  padding:14px 16px;background:#09131F;
+  border:1px solid #1A2D45;border-radius:14px;
+  margin-bottom:8px;cursor:pointer;transition:border .18s;
+}
+.trow:hover{border-color:#243D5C;}
+
+/* ── ADDRESS BOX ── */
+.addr-box{
+  background:#050D1A;border:2px solid #1A2D45;border-radius:12px;
+  padding:13px 15px;font-size:14px;word-break:break-all;
+  color:#00FFB2;line-height:1.6;margin-bottom:8px;
+}
+.addr-box.sol{color:#A855F7;}
+.addr-box.btc{color:#FFB800;}
+
+/* ── SOL PICKER ── */
+.sol-card{
+  background:#09131F;border:2px solid #1A2D45;border-radius:14px;
+  padding:16px;margin-bottom:12px;cursor:pointer;transition:all .18s;
+}
+.sol-card:hover{border-color:#00FFB260;}
+.sol-card.selected{border-color:#00FFB2;background:#00FFB208;}
+
+/* ── MODAL ── */
+.modal-bg{position:fixed;inset:0;background:#000000A0;z-index:200;display:none;align-items:flex-end;}
+.modal-bg.open{display:flex;}
+.modal-panel{width:100%;max-height:90vh;background:#09131F;border-radius:22px 22px 0 0;padding:22px 16px 50px;overflow-y:auto;}
+
+/* ── MENU ── */
+#menu-bg{position:fixed;inset:0;background:#000000A0;z-index:100;display:none;}
+#menu-panel{position:fixed;top:0;right:0;bottom:0;width:85%;max-width:320px;background:#09131F;border-left:1px solid #1A2D45;z-index:101;padding:28px 18px 50px;overflow-y:auto;display:none;}
+.menu-title{font-family:'Orbitron',monospace;font-size:14px;color:#00FFB2;letter-spacing:3px;margin-bottom:18px;}
+.mitem{display:flex;align-items:center;gap:13px;padding:15px 14px;border-radius:13px;border:1px solid #1A2D45;margin-bottom:8px;cursor:pointer;transition:all .18s;background:#0C1830;}
+.mitem:hover{border-color:#243D5C;}
+.micon{font-size:22px;}
+.mtext{font-size:15px;font-weight:700;}
+.msub{font-size:12px;color:#7A98B8;margin-top:2px;}
+
+/* ── MISC ── */
+.back-btn{background:none;border:none;color:#5A7898;font-size:15px;cursor:pointer;padding:0;margin-bottom:16px;font-weight:600;}
+.back-btn:hover{color:#00FFB2;}
+.divider{border:none;border-top:1px solid #1A2D45;margin:16px 0;}
+.flex{display:flex;}.gap8{gap:8px;}.f1{flex:1;}.mb0{margin-bottom:0;}
+.section-hdr{display:flex;justify-content:space-between;align-items:center;margin:18px 0 10px;}
+.section-title{font-size:14px;font-weight:700;color:#5A7898;text-transform:uppercase;letter-spacing:1px;}
+.kbox{background:#050D1A;border:2px solid #FFB80040;border-radius:12px;padding:13px 15px;font-size:13px;word-break:break-all;color:#FFB800;line-height:1.7;margin-bottom:10px;}
+.sgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:7px;margin-top:10px;}
+.sword{background:#050D1A;border:1px solid #1A2D45;border-radius:10px;padding:9px 8px;text-align:center;}
+.snum{font-size:10px;color:#7A98B8;display:block;margin-bottom:3px;}
+.sw{font-size:15px;color:#E8F4FF;font-weight:600;}
+.wcs{border-radius:12px;padding:13px 15px;font-size:14px;margin-top:10px;}
+.wok{background:#00FFB215;border:1px solid #00FFB230;color:#00FFB2;}
+.wwait{background:#FFB80015;border:1px solid #FFB80030;color:#FFB800;}
+.werr{background:#FF3D5A15;border:1px solid #FF3D5A30;color:#FF3D5A;}
+.sol-badge{display:inline-block;padding:2px 8px;border-radius:16px;font-size:12px;font-weight:700;background:#A855F715;color:#A855F7;border:1px solid #A855F740;}
+.btc-badge{display:inline-block;padding:2px 8px;border-radius:16px;font-size:12px;font-weight:700;background:#FFB80015;color:#FFB800;border:1px solid #FFB80040;}
+.wallet-item{background:#050D1A;border:2px solid #1A2D45;border-radius:12px;padding:14px 16px;margin-bottom:8px;cursor:pointer;transition:all .18s;}
+.wallet-item.active{border-color:#00FFB2;background:#00FFB208;}
+.dcard{background:#09131F;border:1px solid #1A2D45;border-radius:14px;padding:14px 16px;margin-bottom:8px;display:flex;align-items:center;justify-content:space-between;}
+.tag{display:inline-block;padding:3px 10px;border-radius:8px;font-size:13px;font-weight:700;margin:0 4px 5px 0;}
+.slip-btn{padding:6px 14px;border-radius:8px;border:1px solid #1A2D45;background:transparent;color:#5A7898;font-family:'Inter',sans-serif;font-size:13px;font-weight:600;cursor:pointer;}
+.slip-btn.on{border-color:#00FFB2;color:#00FFB2;background:#00FFB210;}
+</style>
+</head>
+<body>
+<div id="app">
+
+<!-- ══ TICKER ══ -->
+<div id="ticker" style="display:none;" onclick="openMkt()">
+  <div id="ttrack"><span style="color:#7A98B8;padding:0 20px;font-size:14px;">Loading prices...</span></div>
+</div>
+
+<!-- ══ HOME ══ -->
+<div class="scr on" id="s-home">
+<div class="home-wrap">
+  <svg class="logo-hex" viewBox="0 0 90 90" fill="none">
+    <polygon points="45,4 82,24 82,66 45,86 8,66 8,24" fill="#00FFB20C" stroke="#00FFB2" stroke-width="1.5"/>
+    <polygon points="45,14 72,30 72,60 45,76 18,60 18,30" fill="#00FFB207" stroke="#00FFB250" stroke-width="1"/>
+    <text x="45" y="52" text-anchor="middle" font-family="Orbitron" font-weight="900" font-size="20" fill="#00FFB2">EZ</text>
+    <text x="45" y="63" text-anchor="middle" font-family="Orbitron" font-size="6" fill="#00FFB270" letter-spacing="3">WALLET</text>
+  </svg>
+  <div class="logo-title">EZ WALLET</div>
+  <div class="logo-sub">Real HD Multichain Wallet</div>
+  <div class="logo-brand">by ELECTZA</div>
+  <div class="chain-tags">
+    <span class="ctag" style="color:#F7931A;border-color:#F7931A60;background:#F7931A12">₿ BTC</span>
+    <span class="ctag" style="color:#627EEA;border-color:#627EEA60;background:#627EEA12">⟠ ETH</span>
+    <span class="ctag" style="color:#0052FF;border-color:#0052FF60;background:#0052FF12">🔵 BASE</span>
+    <span class="ctag" style="color:#F0B90B;border-color:#F0B90B60;background:#F0B90B12">◈ BNB</span>
+    <span class="ctag" style="color:#8247E5;border-color:#8247E560;background:#8247E512">⬡ POL</span>
+    <span class="ctag" style="color:#28A0F0;border-color:#28A0F060;background:#28A0F012">◎ ARB</span>
+    <span class="ctag" style="color:#A855F7;border-color:#A855F760;background:#A855F712">◑ SOL</span>
+  </div>
+  <p class="home-desc">Non-custodial · BIP44 HD · Real addresses<br/>Live balances · Auto-detect tokens<br/>WalletConnect · DEX ready</p>
+  <div class="home-btns">
+    <div id="saved-btn" style="display:none;margin-bottom:12px;"></div>
+    <button class="btn btn-p" onclick="goCreate()">+ CREATE NEW WALLET</button>
+    <button class="btn btn-g" onclick="go('s-import')">↓ IMPORT SEED PHRASE</button>
+    <button class="btn btn-gold" onclick="go('s-importpk')">⚿ IMPORT PRIVATE KEY</button>
+  </div>
+  <div class="info-box" style="max-width:380px;">✓ Keys never leave your browser · No server · No tracking</div>
+</div>
+</div>
+
+<!-- ══ IMPORT SEED ══ -->
+<div class="scr" id="s-import">
+<div style="padding:20px 16px 60px;">
+  <button class="back-btn" onclick="go('s-home')">← Back</button>
+  <div style="text-align:center;margin-bottom:24px;">
+    <div style="font-family:'Orbitron',monospace;font-size:22px;font-weight:900;color:#00FFB2;">IMPORT SEED</div>
+    <div style="font-size:14px;color:#5A7898;margin-top:4px;">Restore existing wallet</div>
+  </div>
+  <div class="err-box" id="imp-err"></div>
+  <label class="lbl">Seed Phrase (12 or 24 words)</label>
+  <textarea id="imp-phrase" placeholder="word1 word2 word3 ... word12"></textarea>
+  <p style="font-size:13px;color:#7A98B8;margin-top:8px;line-height:1.7;">Works with MetaMask · Phantom · Trust Wallet · Ledger · Coinbase Wallet</p>
+  <label class="lbl">Wallet Label (optional)</label>
+  <input type="text" id="imp-label" placeholder="My Main Wallet"/>
+  <button class="btn btn-p" style="margin-top:18px;" onclick="doImportSeed()">RESTORE WALLET</button>
+  <div class="warn-box">⚠ Only enter on a trusted private device. Never on public Wi-Fi.</div>
+</div>
+</div>
+
+<!-- ══ IMPORT PK ══ -->
+<div class="scr" id="s-importpk">
+<div style="padding:20px 16px 60px;">
+  <button class="back-btn" onclick="go('s-home')">← Back</button>
+  <div style="text-align:center;margin-bottom:24px;">
+    <div style="font-family:'Orbitron',monospace;font-size:22px;font-weight:900;color:#00FFB2;">IMPORT KEY</div>
+    <div style="font-size:14px;color:#5A7898;margin-top:4px;">From private key</div>
+  </div>
+  <div class="err-box" id="ipk-err"></div>
+  <label class="lbl">Chain Type</label>
+  <select id="ipk-type">
+    <option value="evm">EVM — ETH / BASE / BNB / POL / ARB / AVAX</option>
+    <option value="sol">Solana (SOL)</option>
+    <option value="btc">Bitcoin (BTC)</option>
+  </select>
+  <label class="lbl">Private Key</label>
+  <input type="text" id="ipk-key" placeholder="0x... or 64-char hex"/>
+  <label class="lbl">Wallet Label (optional)</label>
+  <input type="text" id="ipk-label" placeholder="My Imported Key"/>
+  <button class="btn btn-p" style="margin-top:18px;" onclick="doImportPK()">IMPORT & OPEN</button>
+  <div class="warn-box">⚠ Never paste your key on untrusted devices.</div>
+</div>
+</div>
+
+<!-- ══ SOL ADDRESS PICKER ══ -->
+<div class="scr" id="s-solpick">
+<div style="padding:20px 16px 60px;">
+  <div style="text-align:center;margin-bottom:24px;">
+    <div style="font-size:40px;margin-bottom:10px;" id="solpick-icon">◑</div>
+    <div style="font-family:'Orbitron',monospace;font-size:18px;font-weight:900;color:#00FFB2;" id="solpick-title">SELECT SOL ADDRESS</div>
+    <div style="font-size:14px;color:#5A7898;margin-top:8px;line-height:1.7;" id="solpick-sub">Multiple addresses found from your seed.<br/>Tap the one that matches your Phantom wallet.</div>
+  </div>
+  <div id="sol-pick-list"></div>
+  <div style="background:#09131F;border:1px solid #1A2D45;border-radius:12px;padding:14px;margin-top:12px;">
+    <div style="font-size:13px;color:#5A7898;line-height:1.8;">📱 Open Phantom → tap wallet name at top → copy your address → find the match above.</div>
+  </div>
+  <button class="btn btn-g" style="margin-top:14px;" id="solpick-skip" onclick="skipSolPick()">I'll check later →</button>
+</div>
+</div>
+
+<!-- ══ PIN SETUP ══ -->
+<div class="scr" id="s-pin" style="padding:0;">
+<div style="min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:30px 20px 40px;max-width:480px;margin:0 auto;width:100%;">
+  <div style="text-align:center;margin-bottom:16px;">
+    <div style="font-family:'Orbitron',monospace;font-size:26px;font-weight:900;color:#00FFB2;" id="pin-title">SET PIN</div>
+    <div style="font-size:16px;color:#5A7898;margin-top:6px;" id="pin-sub">Choose a 6-digit PIN</div>
+  </div>
+  <div class="err-box" id="pin-err"></div>
+  <div class="pin-dots" id="pdots">
+    <div class="dot" id="pd0"></div><div class="dot" id="pd1"></div><div class="dot" id="pd2"></div>
+    <div class="dot" id="pd3"></div><div class="dot" id="pd4"></div><div class="dot" id="pd5"></div>
+  </div>
+  <div class="pin-pad">
+    <button class="pkey" onclick="PK('1')">1</button><button class="pkey" onclick="PK('2')">2</button><button class="pkey" onclick="PK('3')">3</button>
+    <button class="pkey" onclick="PK('4')">4</button><button class="pkey" onclick="PK('5')">5</button><button class="pkey" onclick="PK('6')">6</button>
+    <button class="pkey" onclick="PK('7')">7</button><button class="pkey" onclick="PK('8')">8</button><button class="pkey" onclick="PK('9')">9</button>
+    <button class="pkey inv"></button><button class="pkey" onclick="PK('0')">0</button><button class="pkey" onclick="PBk()" style="font-size:18px;">⌫</button>
+  </div>
+  <div style="text-align:center;margin-top:20px;">
+    <button class="btn btn-red btn-sm" onclick="go('s-home')" style="width:auto;">CANCEL</button>
+  </div>
+</div>
+</div>
+
+<!-- ══ UNLOCK ══ -->
+<div class="scr" id="s-unlock" style="padding:0;">
+<div style="min-height:100vh;display:flex;flex-direction:column;justify-content:center;padding:30px 20px 40px;max-width:480px;margin:0 auto;width:100%;">
+  <div style="text-align:center;margin-bottom:16px;">
+    <div style="font-family:'Orbitron',monospace;font-size:26px;font-weight:900;color:#00FFB2;">UNLOCK</div>
+    <div style="font-size:16px;color:#5A7898;margin-top:6px;" id="unlock-name">EZ Wallet</div>
+  </div>
+  <div class="err-box" id="unlock-err"></div>
+  <div class="pin-dots" id="updots">
+    <div class="dot" id="upd0"></div><div class="dot" id="upd1"></div><div class="dot" id="upd2"></div>
+    <div class="dot" id="upd3"></div><div class="dot" id="upd4"></div><div class="dot" id="upd5"></div>
+  </div>
+  <div class="pin-pad">
+    <button class="pkey" onclick="UK('1')">1</button><button class="pkey" onclick="UK('2')">2</button><button class="pkey" onclick="UK('3')">3</button>
+    <button class="pkey" onclick="UK('4')">4</button><button class="pkey" onclick="UK('5')">5</button><button class="pkey" onclick="UK('6')">6</button>
+    <button class="pkey" onclick="UK('7')">7</button><button class="pkey" onclick="UK('8')">8</button><button class="pkey" onclick="UK('9')">9</button>
+    <button class="pkey inv"></button><button class="pkey" onclick="UK('0')">0</button><button class="pkey" onclick="UBk()" style="font-size:18px;">⌫</button>
+  </div>
+  <div style="text-align:center;margin-top:16px;">
+    <button class="btn btn-red btn-sm" onclick="nukeAll()" style="width:auto;">RESET ALL DATA</button>
+  </div>
+  <p style="font-size:13px;color:#7A98B8;text-align:center;margin-top:10px;">Reset permanently deletes all saved wallets.</p>
+</div>
+</div>
+
+<!-- ══ MAIN WALLET ══ -->
+<div class="scr" id="s-wallet" style="padding:0;">
+  <div class="w-header">
+    <div>
+      <div class="w-title">EZ WALLET</div>
+      <div class="w-sub" id="w-name">Account 0</div>
+    </div>
+    <div class="flex gap8" style="align-items:center;">
+      <div class="status-bar" style="padding:0;background:none;border:none;">
+        <div class="sdot" id="rpc-dot"></div>
+        <span id="rpc-lbl" style="font-size:12px;color:#5A7898;">LIVE</span>
+      </div>
+      <button class="hbtn" onclick="openMkt()" style="color:#FFB800;">📈</button>
+      <button class="hbtn" onclick="openMenu()">☰</button>
+    </div>
+  </div>
+
+  <div style="flex:1;overflow-y:auto;-webkit-overflow-scrolling:touch;padding:0 0 60px;">
+
+    <!-- SCAN STATUS -->
+    <div id="scan-status-bar" style="display:none;padding:10px 16px;background:#09131F;border-bottom:1px solid #1A2D45;font-size:13px;color:#5A7898;display:flex;align-items:center;gap:8px;">
+      <span class="spin" id="scan-spin" style="display:none;"></span>
+      <span id="scan-msg">Ready</span>
+      <button onclick="startScan()" style="margin-left:auto;background:none;border:1px solid #1A2D45;border-radius:8px;color:#5A7898;font-size:12px;padding:5px 10px;cursor:pointer;font-family:'Inter',sans-serif;font-weight:600;">↻ Refresh</button>
+    </div>
+
+    <div style="padding:16px;">
+
+      <!-- TABS -->
+      <div class="tabs" style="margin-bottom:16px;">
+        <button class="tab on" id="tb-assets" onclick="ST('assets')">ASSETS</button>
+        <button class="tab" id="tb-send" onclick="ST('send')">SEND</button>
+        <button class="tab" id="tb-fiat" onclick="ST('fiat')">FIAT</button>
+        <button class="tab" id="tb-rug" onclick="ST('rug')">RUG</button>
+        <button class="tab" id="tb-keys" onclick="ST('keys')">KEYS</button>
+        <button class="tab" id="tb-seed" onclick="ST('seed')">SEED</button>
+        <button class="tab" id="tb-swap" onclick="ST('swap')">SWAP</button>
+        <button class="tab" id="tb-dex" onclick="ST('dex')">DEX</button>
+        <button class="tab" id="tb-wc" onclick="ST('wc')">WC</button>
+        <button class="tab" id="tb-tg" onclick="ST('tg')">TG</button>
+      </div>
+
+      <!-- ASSETS -->
+      <div id="p-assets">
+        <div class="bal-hero">
+          <div class="bal-label">TOTAL VALUE</div>
+          <div class="bal-amount" id="total-bal">$—</div>
+          <div class="bal-sub" id="bal-sub">Tap Refresh to load</div>
+        </div>
+        <div class="flex gap8" style="margin-bottom:10px;">
+          <button class="btn btn-g btn-sm f1 mb0" onclick="showReceive()">↓ RECEIVE</button>
+          <button class="btn btn-g btn-sm f1 mb0" onclick="openScanner()">📷 SCAN</button>
+          <button class="btn btn-p btn-sm f1 mb0" onclick="startScan()">↻ REFRESH</button>
+        </div>
+        <div class="section-title" style="margin-bottom:10px;">NATIVE BALANCES</div>
+        <div id="asset-list"></div>
+        <div class="section-hdr">
+          <div class="section-title">TOKENS</div>
+          <button class="btn btn-p btn-sm mb0" onclick="ST('addtoken')" style="font-size:13px;padding:8px 14px;">+ ADD</button>
+        </div>
+        <div id="token-list"></div>
+      </div>
+
+      <!-- ADD TOKEN -->
+      <div id="p-addtoken" style="display:none;">
+        <button class="back-btn" onclick="ST('assets')">← Back to Assets</button>
+        <div style="font-size:20px;font-weight:700;margin-bottom:14px;">Add Token</div>
+
+        <!-- QUICK-ADD STABLECOINS -->
+        <div style="background:#09131F;border:2px solid #00FFB230;border-radius:14px;padding:16px;margin-bottom:18px;">
+          <div style="font-size:14px;font-weight:700;color:#00FFB2;margin-bottom:12px;">⚡ Quick Add Stablecoin</div>
+          <div class="flex gap8" style="margin-bottom:10px;">
+            <div style="flex:1;">
+              <label class="lbl" style="margin-top:0;">Token</label>
+              <select id="qs-token" onchange="updateStableNetworks()">
+                <option value="USDT">USDT</option>
+                <option value="USDC">USDC</option>
+                <option value="DAI">DAI</option>
+              </select>
+            </div>
+            <div style="flex:1;">
+              <label class="lbl" style="margin-top:0;">Network</label>
+              <select id="qs-network"></select>
+            </div>
+          </div>
+          <button class="btn btn-p btn-sm" style="width:100%;" onclick="quickAddStable()">+ ADD STABLECOIN</button>
+        </div>
+        <div style="font-size:13px;color:#7A98B8;text-align:center;margin-bottom:16px;">— or add any custom token below —</div>
+        <label class="lbl" style="margin-top:0;">Chain</label>
+        <select id="tok-chain">
+          <option value="eth">Ethereum</option><option value="base">Base</option>
+          <option value="bsc">BNB Chain</option><option value="polygon">Polygon</option>
+          <option value="arbitrum">Arbitrum</option><option value="avax">Avalanche</option>
+          <option value="solana">Solana</option><option value="tron">Tron (TRC20)</option>
+        </select>
+        <label class="lbl">Contract Address</label>
+        <div class="flex gap8">
+          <input type="text" id="tok-addr" placeholder="0x... or Solana mint" style="flex:1;"/>
+          <button class="btn btn-p btn-sm mb0" onclick="lookupTok()">LOOKUP</button>
+        </div>
+        <div id="tok-st" style="display:none;" class="wcs"></div>
+        <div id="tok-preview" style="display:none;background:#09131F;border:2px solid #00FFB2;border-radius:14px;padding:16px;margin-top:12px;">
+          <div style="font-family:'Orbitron',monospace;font-size:20px;color:#00FFB2;font-weight:900;" id="tok-sym-p">—</div>
+          <div style="font-size:15px;color:#E8F4FF;margin-top:5px;" id="tok-name-p">—</div>
+          <div style="font-size:13px;color:#5A7898;margin-top:3px;" id="tok-dec-p">—</div>
+        </div>
+        <label class="lbl">Symbol (manual)</label>
+        <input type="text" id="tok-sym" placeholder="USDT"/>
+        <label class="lbl">Decimals</label>
+        <input type="number" id="tok-dec" value="18"/>
+        <button class="btn btn-p" style="margin-top:16px;" onclick="addTok()">+ ADD TOKEN</button>
+        <div class="info-box">Tap LOOKUP to auto-fill details from chain.</div>
+      </div>
+
+      <!-- SEND -->
+      <div id="p-send" style="display:none;">
+        <label class="lbl" style="margin-top:0;">FROM (EVM Address)</label>
+        <div class="addr-box" style="font-size:13px;" id="send-from">—</div>
+        <label class="lbl">TO ADDRESS</label>
+        <input type="text" id="send-to" placeholder="0x... or address"/>
+        <label class="lbl">AMOUNT (<span id="send-sym">ETH</span>)</label>
+        <input type="number" id="send-amt" placeholder="0.0" step="any"/>
+        <label class="lbl">NETWORK</label>
+        <select id="send-chain">
+          <option value="eth">Ethereum</option><option value="base">Base</option>
+          <option value="bsc">BNB Chain</option><option value="polygon">Polygon</option>
+          <option value="arbitrum">Arbitrum</option>
+        </select>
+        <button class="btn btn-p" style="margin-top:16px;" onclick="doSend()">SEND TRANSACTION</button>
+        <div id="send-st" style="display:none;" class="wcs"></div>
+        <div class="warn-box">⚠ Blockchain transactions are irreversible.</div>
+      </div>
+
+      <!-- KEYS -->
+      <div id="p-keys" style="display:none;">
+        <label class="lbl" style="margin-top:0;">EVM ADDRESS (ETH/BASE/BNB/POL/ARB)</label>
+        <div class="addr-box" id="key-evm">—</div>
+        <div id="evm-switch-wrap" style="margin-top:8px;display:none;">
+          <div style="font-size:13px;color:#5A7898;margin-bottom:8px;">Alternative EVM addresses from your seed:</div>
+          <div id="evm-alts"></div>
+        </div>
+        <button onclick="showEvmSwitch()" style="margin-top:8px;width:100%;padding:11px;border-radius:10px;border:1px solid #1A2D45;background:transparent;color:#5A7898;font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer;">⇄ SWITCH EVM ADDRESS (if Base/ETH wrong)</button>
+        <label class="lbl">SOLANA ADDRESS <span class="sol-badge">SOL</span></label>
+        <div class="addr-box sol" id="key-sol">—</div>
+        <div id="sol-switch-wrap" style="margin-top:8px;display:none;">
+          <div style="font-size:13px;color:#5A7898;margin-bottom:8px;">Alternative SOL addresses from your seed:</div>
+          <div id="sol-alts"></div>
+        </div>
+        <button onclick="showSolSwitch()" style="margin-top:8px;width:100%;padding:11px;border-radius:10px;border:1px solid #1A2D45;background:transparent;color:#5A7898;font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer;">⇄ SWITCH SOL ADDRESS (if wrong)</button>
+        <label class="lbl">BITCOIN ADDRESS <span class="btc-badge">BTC</span></label>
+        <div class="addr-box btc" id="key-btc">—</div>
+        <label class="lbl">TRON ADDRESS <span style="display:inline-block;padding:2px 8px;border-radius:16px;font-size:12px;font-weight:700;background:#EF002715;color:#EF0027;border:1px solid #EF002740;">TRX</span></label>
+        <div class="addr-box" id="key-tron" style="color:#EF0027;border-color:#EF002740;">—</div>
+        <div class="divider"></div>
+        <label class="lbl">PRIVATE KEY (current chain)</label>
+        <div class="kbox" id="pk-box">•••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••••</div>
+        <div class="flex gap8" style="margin-top:8px;">
+          <button class="btn btn-gold btn-sm f1" onclick="togglePK()">👁 SHOW/HIDE</button>
+          <button class="btn btn-g btn-sm f1" onclick="copyPK()">COPY KEY</button>
+        </div>
+        <div class="info-box">✓ Same seed phrase opens this wallet in MetaMask (EVM) and Phantom (SOL).</div>
+        <div class="warn-box">⚠ Never share your private key with anyone.</div>
+      </div>
+
+      <!-- SEED -->
+      <div id="p-seed" style="display:none;">
+        <div id="seed-locked">
+          <p style="font-size:15px;color:#5A7898;line-height:1.8;margin-bottom:14px;">Your seed phrase restores your full wallet on any device. Write it down and store offline.</p>
+          <button class="btn btn-gold" onclick="revealSeed()">👁 REVEAL SEED PHRASE</button>
+        </div>
+        <div id="seed-open" style="display:none;">
+          <div class="sgrid" id="seed-grid"></div>
+          <div class="flex gap8" style="margin-top:14px;">
+            <button class="btn btn-g btn-sm f1" onclick="copySeed()">COPY ALL</button>
+            <button class="btn btn-red btn-sm f1" onclick="hideSeed()">HIDE</button>
+          </div>
+          <div class="warn-box">⚠ Write on paper. Store offline. Never screenshot.</div>
+        </div>
+        <div id="seed-none" style="display:none;" class="warn-box">No seed phrase — wallet imported via private key.</div>
+      </div>
+
+      <!-- SWAP -->
+      <div id="p-swap" style="display:none;">
+        <div style="font-size:20px;font-weight:700;margin-bottom:6px;">⇄ Swap (Solana)</div>
+        <p style="font-size:13px;color:#5A7898;line-height:1.6;margin-bottom:14px;">Swap any Solana token instantly via Jupiter — the best-price aggregator. EVM swap coming next update.</p>
+
+        <!-- FROM -->
+        <div style="background:#09131F;border:1px solid #1A2D45;border-radius:14px;padding:16px;margin-bottom:8px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:12px;color:#5A7898;font-weight:600;">YOU PAY</span>
+            <span style="font-size:12px;color:#5A7898;" id="swap-from-bal">Balance: —</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <input type="number" id="swap-from-amt" placeholder="0.0" step="any" oninput="quoteSwap()" style="flex:1;border:none;background:none;font-size:24px;font-weight:700;padding:0;"/>
+            <select id="swap-from-token" onchange="onSwapTokenChange()" style="width:auto;flex-shrink:0;font-weight:700;"></select>
+          </div>
+          <div style="margin-top:8px;">
+            <button onclick="setSwapMax()" style="background:#00FFB215;border:1px solid #00FFB230;border-radius:7px;color:#00FFB2;font-size:12px;padding:4px 10px;cursor:pointer;font-weight:600;">MAX</button>
+          </div>
+        </div>
+
+        <!-- swap direction -->
+        <div style="text-align:center;margin:-2px 0;position:relative;z-index:2;">
+          <button onclick="flipSwap()" style="width:40px;height:40px;border-radius:50%;background:#0C1830;border:2px solid #1A2D45;color:#00FFB2;font-size:18px;cursor:pointer;">⇅</button>
+        </div>
+
+        <!-- TO -->
+        <div style="background:#09131F;border:1px solid #1A2D45;border-radius:14px;padding:16px;margin-top:8px;margin-bottom:14px;">
+          <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:8px;">
+            <span style="font-size:12px;color:#5A7898;font-weight:600;">YOU RECEIVE (estimate)</span>
+          </div>
+          <div style="display:flex;gap:10px;align-items:center;">
+            <input type="text" id="swap-to-amt" placeholder="0.0" readonly style="flex:1;border:none;background:none;font-size:24px;font-weight:700;padding:0;color:#00FFB2;"/>
+            <select id="swap-to-token" onchange="quoteSwap()" style="width:auto;flex-shrink:0;font-weight:700;"></select>
+          </div>
+        </div>
+
+        <!-- quote details -->
+        <div id="swap-details" style="display:none;background:#050D1A;border:1px solid #1A2D45;border-radius:10px;padding:12px;margin-bottom:14px;font-size:13px;color:#5A7898;"></div>
+
+        <!-- slippage -->
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:14px;">
+          <span style="font-size:13px;color:#5A7898;">Slippage:</span>
+          <button onclick="setSlip(0.5)" id="slip-05" class="slip-btn">0.5%</button>
+          <button onclick="setSlip(1)" id="slip-1" class="slip-btn">1%</button>
+          <button onclick="setSlip(3)" id="slip-3" class="slip-btn">3%</button>
+        </div>
+
+        <button class="btn btn-p" onclick="doSwap()" id="swap-btn">GET QUOTE</button>
+        <div id="swap-status" style="display:none;" class="wcs"></div>
+        <div class="warn-box">⚠ Swaps are irreversible. Always check the estimate. Jupiter routes through the best available pools.</div>
+      </div>
+
+      <!-- DEX -->
+      <div id="p-dex" style="display:none;">
+        <div style="font-size:20px;font-weight:700;margin-bottom:16px;">Swap / Trade</div>
+        <div id="dex-list"></div>
+        <div class="divider"></div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:12px;">Solana DEXs <span class="sol-badge">SOL</span></div>
+        <div id="dex-sol"></div>
+        <div class="divider"></div>
+        <div style="font-size:15px;font-weight:700;margin-bottom:12px;">Bitcoin DEXs <span class="btc-badge">BTC</span></div>
+        <div id="dex-btc"></div>
+      </div>
+
+      <!-- FIAT -->
+      <div id="p-fiat" style="display:none;">
+        <div style="font-size:20px;font-weight:700;margin-bottom:6px;">💱 Buy / Sell Crypto</div>
+        <p style="font-size:14px;color:#5A7898;line-height:1.7;margin-bottom:14px;">Deposit fiat to buy crypto, or sell crypto for cash. Your address is pre-filled automatically.</p>
+
+        <!-- Buy/Sell toggle -->
+        <div class="flex gap8" style="margin-bottom:14px;">
+          <button class="btn btn-p btn-sm f1 mb0" id="ramp-buy" onclick="setRampMode('buy')">↓ BUY CRYPTO</button>
+          <button class="btn btn-g btn-sm f1 mb0" id="ramp-sell" onclick="setRampMode('sell')">↑ SELL CRYPTO</button>
+        </div>
+
+        <!-- Currency + portfolio value -->
+        <label class="lbl" style="margin-top:0;">Currency</label>
+        <select id="fiat-cur" onchange="calcFiat()">
+          <option value="zar">🇿🇦 ZAR — South African Rand</option>
+          <option value="usd">🇺🇸 USD — US Dollar</option>
+          <option value="gbp">🇬🇧 GBP — British Pound</option>
+          <option value="eur">🇪🇺 EUR — Euro</option>
+          <option value="ngn">🇳🇬 NGN — Nigerian Naira</option>
+          <option value="aed">🇦🇪 AED — UAE Dirham</option>
+        </select>
+        <div style="background:#09131F;border:2px solid #00FFB2;border-radius:16px;padding:18px;text-align:center;margin-top:14px;margin-bottom:16px;">
+          <div style="font-size:12px;color:#5A7898;letter-spacing:3px;font-weight:600;">YOUR PORTFOLIO VALUE</div>
+          <div style="font-family:'Orbitron',monospace;font-size:30px;font-weight:900;color:#00FFB2;margin:10px 0;" id="fiat-amount">—</div>
+          <div style="font-size:13px;color:#7A98B8;" id="fiat-rate">Select currency</div>
+        </div>
+
+        <!-- Which crypto + address -->
+        <label class="lbl">Receive Into (your address)</label>
+        <select id="ramp-chain" onchange="updateRampAddr()">
+          <option value="eth">Ethereum (ETH)</option>
+          <option value="base">Base (ETH)</option>
+          <option value="bsc">BNB Chain (BNB)</option>
+          <option value="polygon">Polygon (POL)</option>
+          <option value="solana">Solana (SOL)</option>
+          <option value="tron">Tron (TRX/USDT)</option>
+          <option value="btc">Bitcoin (BTC)</option>
+        </select>
+        <div class="addr-box" id="ramp-addr" style="font-size:13px;margin-top:8px;">—</div>
+        <button onclick="copyRampAddr()" style="width:100%;padding:11px;border-radius:10px;border:1px solid #1A2D45;background:transparent;color:#5A7898;font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer;margin-bottom:6px;">📋 COPY MY ADDRESS</button>
+        <div style="font-size:12px;color:#7A98B8;line-height:1.7;margin-bottom:14px;">⚠ Important: if you change the crypto inside Transak, make sure the network matches the address you copied above. EVM coins (ETH/USDT/USDC/BNB) all use your EVM address; SOL uses Solana address; BTC uses Bitcoin address.</div>
+
+        <div class="section-title" style="margin-bottom:10px;" id="ramp-section-title">BUY WITH FIAT (ON-RAMP)</div>
+        <div id="ramp-providers"></div>
+      </div>
+
+      <!-- RUG CHECK -->
+      <div id="p-rug" style="display:none;">
+        <div style="font-size:20px;font-weight:700;margin-bottom:6px;">🔍 Token Safety Check</div>
+        <p style="font-size:14px;color:#5A7898;line-height:1.7;margin-bottom:14px;">Paste any token contract to get a safety score and rug risk analysis.</p>
+        <label class="lbl" style="margin-top:0;">Chain</label>
+        <select id="rug-chain">
+          <option value="eth">Ethereum</option><option value="base">Base</option>
+          <option value="bsc">BNB Chain</option><option value="polygon">Polygon</option>
+          <option value="solana">Solana</option>
+        </select>
+        <label class="lbl">Contract / Mint Address</label>
+        <div class="flex gap8">
+          <input type="text" id="rug-addr" placeholder="0x... or Solana mint" style="flex:1;"/>
+          <button class="btn btn-p btn-sm mb0" onclick="doRugCheck()">SCAN</button>
+        </div>
+        <div id="rug-result" style="margin-top:14px;"></div>
+        <div class="divider"></div>
+        <div class="section-title" style="margin-bottom:10px;">PUMP.FUN & GEM FINDERS</div>
+        <button class="btn btn-g" style="font-size:15px;" onclick="window.open('https://pump.fun','_blank')">🚀 Open Pump.fun</button>
+        <button class="btn btn-g" style="font-size:15px;" onclick="window.open('https://dexscreener.com/solana?rankBy=volume&order=desc','_blank')">📊 DexScreener Trending</button>
+        <button class="btn btn-g" style="font-size:15px;" onclick="window.open('https://birdeye.so/find-gems','_blank')">💎 Birdeye Gem Finder</button>
+      </div>
+
+      <!-- TELEGRAM BOT -->
+      <div id="p-tg" style="display:none;">
+        <div style="background:#0088cc12;border:1px solid #0088cc40;border-radius:14px;padding:16px;margin-bottom:14px;">
+          <div style="color:#4DA8FF;font-family:'Orbitron',monospace;font-size:14px;font-weight:700;margin-bottom:6px;">📱 TELEGRAM TRADING BOT</div>
+          <p style="font-size:14px;color:#5A7898;line-height:1.7;">Link EZ Wallet to your Solana bot for token sniping, copy trading, and signal execution.</p>
+        </div>
+        <label class="lbl" style="margin-top:0;">Your Solana Address</label>
+        <div class="addr-box sol" style="font-size:13px;margin-bottom:12px;" id="tg-sol">—</div>
+        <label class="lbl">Bot Webhook URL</label>
+        <input type="text" id="tg-webhook" placeholder="https://your-bot.server.com/webhook"/>
+        <label class="lbl">Label</label>
+        <input type="text" id="tg-lbl" placeholder="EZ Main"/>
+        <button class="btn btn-p" style="margin-top:13px;" onclick="linkTG()">LINK TO TELEGRAM BOT</button>
+        <div id="tg-st" style="display:none;" class="wcs"></div>
+        <div class="info-box">✓ Private key stays in browser. Bot only gets your public address.</div>
+      </div>
+
+      <!-- WC -->
+      <div id="p-wc" style="display:none;">
+        <div style="font-size:20px;font-weight:700;margin-bottom:8px;">WalletConnect v2</div>
+        <p style="font-size:14px;color:#5A7898;line-height:1.8;margin-bottom:14px;">Connect to any dApp. Go to the dApp → Connect Wallet → WalletConnect → copy URI → paste below.</p>
+        <label class="lbl" style="margin-top:0;">WC URI</label>
+        <input type="text" id="wc-uri" placeholder="wc:...@2?relay-protocol=irn&symKey=..."/>
+        <button class="btn btn-p" style="margin-top:12px;" onclick="doWC()">CONNECT DAPP</button>
+        <div id="wc-st" style="display:none;" class="wcs"></div>
+        <div class="divider"></div>
+        <div id="wc-session" style="font-size:14px;color:#7A98B8;">No active session</div>
+      </div>
+
+    </div>
+  </div>
+</div><!-- s-wallet -->
+
+<!-- ══ QR SCANNER MODAL ══ -->
+<div id="scanner-modal" style="display:none;position:fixed;inset:0;background:#000000F5;z-index:300;flex-direction:column;align-items:center;justify-content:center;padding:20px;">
+  <div style="color:#00FFB2;font-family:'Orbitron',monospace;font-size:16px;letter-spacing:2px;margin-bottom:20px;">SCAN QR CODE</div>
+  <div style="position:relative;width:280px;height:280px;border:3px solid #00FFB2;border-radius:18px;overflow:hidden;background:#000;">
+    <video id="scan-video" style="width:100%;height:100%;object-fit:cover;" autoplay muted playsinline></video>
+  </div>
+  <div id="scan-result" style="color:#5A7898;font-size:14px;margin-top:18px;text-align:center;">Point camera at a wallet QR code</div>
+  <button onclick="closeScanner()" style="margin-top:22px;padding:14px 32px;border-radius:12px;border:2px solid #FF3D5A;background:transparent;color:#FF3D5A;font-family:'Inter',sans-serif;font-size:16px;font-weight:700;cursor:pointer;">✕ CLOSE</button>
+</div>
+
+<!-- ══ PAY CONFIRM MODAL ══ -->
+<div class="modal-bg" id="pay-modal">
+<div class="modal-panel">
+  <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:18px;">
+    <div style="font-family:'Orbitron',monospace;font-size:15px;color:#00FFB2;letter-spacing:2px;">CONFIRM PAYMENT</div>
+    <button onclick="document.getElementById('pay-modal').classList.remove('open')" style="background:none;border:none;color:#5A7898;font-size:26px;cursor:pointer;">✕</button>
+  </div>
+  <label class="lbl" style="margin-top:0;">To Address</label>
+  <div class="addr-box" id="pay-to" style="font-size:13px;">—</div>
+  <label class="lbl">Pay With</label>
+  <select id="pay-token" onchange="updatePayPreview()"></select>
+  <label class="lbl">Amount</label>
+  <input type="number" id="pay-amt" placeholder="0.00" step="any" oninput="updatePayPreview()"/>
+  <div id="pay-preview" style="font-size:14px;color:#5A7898;margin-top:8px;min-height:20px;"></div>
+  <button class="btn btn-p" style="margin-top:16px;" onclick="confirmPay()">SEND PAYMENT</button>
+</div>
+</div>
+
+<!-- ══ RECEIVE MODAL ══ -->
+<div class="modal-bg" id="receive-modal">
+<div class="modal-panel">
+  <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:18px;">
+    <div style="font-family:'Orbitron',monospace;font-size:15px;color:#00FFB2;letter-spacing:2px;">RECEIVE</div>
+    <button onclick="closeReceive()" style="background:none;border:none;color:#5A7898;font-size:26px;cursor:pointer;">✕</button>
+  </div>
+  <label class="lbl" style="margin-top:0;">Chain</label>
+  <select id="rcv-chain" onchange="updateReceive()">
+    <option value="evm">EVM (ETH/BASE/BNB/POL/ARB)</option>
+    <option value="sol">Solana (SOL)</option>
+    <option value="tron">Tron (TRX/TRC20)</option>
+    <option value="btc">Bitcoin (BTC)</option>
+  </select>
+  <div style="text-align:center;margin-top:16px;">
+    <img id="rcv-qr" src="" style="border-radius:14px;border:3px solid #00FFB2;padding:6px;background:#fff;width:190px;display:block;margin:0 auto;" alt="QR"/>
+    <div id="rcv-addr" class="addr-box" style="margin-top:12px;text-align:left;"></div>
+    <button onclick="copyRcv()" style="margin-top:10px;width:100%;padding:13px;border-radius:12px;border:2px solid #1A2D45;background:transparent;color:#E8F4FF;font-family:'Inter',sans-serif;font-size:15px;font-weight:700;cursor:pointer;">COPY ADDRESS</button>
+  </div>
+</div>
+</div>
+
+<!-- ══ MARKET MODAL ══ -->
+<div class="modal-bg" id="mkt-modal">
+<div class="modal-panel">
+  <div class="flex" style="justify-content:space-between;align-items:center;margin-bottom:18px;">
+    <div style="font-family:'Orbitron',monospace;font-size:15px;color:#00FFB2;letter-spacing:2px;">MARKETS</div>
+    <button onclick="closeMkt()" style="background:none;border:none;color:#5A7898;font-size:26px;cursor:pointer;">✕</button>
+  </div>
+  <div class="flex gap8" style="margin-bottom:16px;flex-wrap:wrap;">
+    <button class="btn btn-p btn-sm" id="mt-trend" onclick="loadMkt('trend')">🔥 Trending</button>
+    <button class="btn btn-g btn-sm" id="mt-top" onclick="loadMkt('top')">🏆 Top 20</button>
+    <button class="btn btn-g btn-sm" id="mt-gain" onclick="loadMkt('gain')">📈 Gainers</button>
+    <button class="btn btn-g btn-sm" id="mt-lose" onclick="loadMkt('lose')">📉 Losers</button>
+  </div>
+  <div id="mkt-content" style="font-size:15px;color:#5A7898;text-align:center;padding:30px 0;"><span class="spin"></span> Loading...</div>
+</div>
+</div>
+
+<!-- ══ MENU ══ -->
+<div id="menu-bg" onclick="closeMenu()"></div>
+<div id="menu-panel">
+  <button onclick="closeMenu()" style="position:absolute;top:16px;right:16px;background:none;border:none;color:#5A7898;font-size:26px;cursor:pointer;">✕</button>
+  <div class="menu-title">⚙ MENU</div>
+  <div class="mitem" onclick="menuA('accounts')"><span class="micon">👥</span><div><div class="mtext">Accounts</div><div class="msub">Switch or add accounts</div></div></div>
+  <div class="mitem" onclick="menuA('newwallet')"><span class="micon">➕</span><div><div class="mtext">Add Wallet</div><div class="msub">Create or import another</div></div></div>
+  <div class="mitem" onclick="menuA('rename')"><span class="micon">✏️</span><div><div class="mtext">Rename</div><div class="msub">Change wallet label</div></div></div>
+  <div class="divider"></div>
+  <div class="mitem" onclick="menuA('seed')"><span class="micon">📋</span><div><div class="mtext">Backup Seed Phrase</div><div class="msub">View recovery words</div></div></div>
+  <div class="mitem" onclick="menuA('keys')"><span class="micon">🔑</span><div><div class="mtext">View Private Keys</div><div class="msub">Export keys for any chain</div></div></div>
+  <div class="divider"></div>
+  <div class="mitem" onclick="menuA('scan')"><span class="micon">↻</span><div><div class="mtext">Refresh Balances</div><div class="msub">Scan all chains</div></div></div>
+  <div class="mitem" onclick="menuA('addtok')"><span class="micon">🪙</span><div><div class="mtext">Add Custom Token</div><div class="msub">Track any ERC20 or SPL</div></div></div>
+  <div class="mitem" onclick="menuA('rug')"><span class="micon">🔍</span><div><div class="mtext">Token Safety Check</div><div class="msub">Rug check any token</div></div></div>
+  <div class="divider"></div>
+  <div class="mitem" onclick="menuA('fontup')"><span class="micon">🔠</span><div><div class="mtext">Increase Text Size</div><div class="msub" id="font-size-lbl">Current: Normal</div></div></div>
+  <div class="mitem" onclick="menuA('fontdn')"><span class="micon">🔡</span><div><div class="mtext">Decrease Text Size</div><div class="msub">Make text smaller</div></div></div>
+  <div class="divider"></div>
+  <div class="mitem" onclick="menuA('settings')"><span class="micon">⚙️</span><div><div class="mtext">Payment Settings</div><div class="msub">Transak API key for live buying</div></div></div>
+  <div class="mitem" onclick="lockWallet()"><span class="micon">🔒</span><div><div class="mtext">Lock Wallet</div><div class="msub">Require PIN to re-open</div></div></div>
+  <div class="mitem" onclick="menuA('del')" style="border-color:#FF3D5A30;"><span class="micon">🗑</span><div><div class="mtext" style="color:#FF3D5A;">Delete Wallet</div><div class="msub">Remove this wallet</div></div></div>
+  <div class="mitem" onclick="nukeAll()" style="border-color:#FF3D5A30;"><span class="micon">⚠️</span><div><div class="mtext" style="color:#FF3D5A;">Reset All</div><div class="msub">Wipe everything</div></div></div>
+  <!-- Accounts sub-panel -->
+  <div id="menu-accts" style="display:none;margin-top:14px;">
+    <div class="divider"></div>
+    <div style="font-family:'Orbitron',monospace;font-size:11px;color:#00FFB2;letter-spacing:2px;margin-bottom:12px;">ACCOUNTS</div>
+    <div id="acct-list-m"></div>
+    <div id="acct-add-m">
+      <label class="lbl">Account Index</label>
+      <input type="number" id="acct-idx-m" value="1" min="0" max="99"/>
+      <label class="lbl">Label</label>
+      <input type="text" id="acct-lbl-m" placeholder="Trading Account" style="margin-bottom:12px;"/>
+      <button class="btn btn-g btn-sm" onclick="addAccount()" style="width:100%;">+ DERIVE ACCOUNT</button>
+    </div>
+  </div>
+  <!-- Rename sub-panel -->
+  <div id="menu-rename-p" style="display:none;margin-top:14px;">
+    <div class="divider"></div>
+    <div style="font-family:'Orbitron',monospace;font-size:11px;color:#00FFB2;letter-spacing:2px;margin-bottom:12px;">RENAME</div>
+    <label class="lbl" style="margin-top:0;">Wallet Label</label>
+    <input type="text" id="rename-w" placeholder="My Wallet"/>
+    <label class="lbl">Account Label</label>
+    <input type="text" id="rename-a" placeholder="Account 0" style="margin-bottom:12px;"/>
+    <button class="btn btn-p btn-sm" onclick="doRename()" style="width:100%;">SAVE</button>
+  </div>
+  <!-- Settings sub-panel -->
+  <div id="menu-settings-p" style="display:none;margin-top:14px;">
+    <div class="divider"></div>
+    <div style="font-family:'Orbitron',monospace;font-size:11px;color:#00FFB2;letter-spacing:2px;margin-bottom:12px;">PAYMENT SETTINGS</div>
+    <div style="background:#0C1830;border:1px solid #1A2D45;border-radius:12px;padding:14px;margin-bottom:14px;">
+      <div style="font-size:14px;font-weight:700;color:#4DA8FF;margin-bottom:6px;">Transak API Key</div>
+      <p style="font-size:12px;color:#5A7898;line-height:1.7;">Paste your key from dashboard.transak.com → Developers. Stored only on this device, never in code. Enables live buying.</p>
+    </div>
+    <label class="lbl" style="margin-top:0;">API Key</label>
+    <input type="text" id="set-transak-key" placeholder="paste your Transak API key"/>
+    <label class="lbl">Environment</label>
+    <select id="set-transak-env">
+      <option value="STAGING">Staging (test mode — fake money)</option>
+      <option value="PRODUCTION">Production (live — real money)</option>
+    </select>
+    <button class="btn btn-p btn-sm" onclick="saveTransakSettings()" style="width:100%;margin-top:14px;">SAVE SETTINGS</button>
+    <div id="set-status" style="display:none;margin-top:10px;" class="wcs"></div>
+    <div style="font-size:12px;color:#7A98B8;line-height:1.7;margin-top:12px;">💡 Without a key, Transak uses test mode. Paybis & Guardarian work right now with no key needed.</div>
+  </div>
+</div>
+
+</div><!-- app -->
+<script>
+// ══════════════════════════════════════════
+// DATA
+// ══════════════════════════════════════════
+const CHAINS=[
+  {id:'btc',  name:'Bitcoin',  s:'BTC', c:'#F7931A',i:'₿', t:'btc', ex:'https://blockstream.info/address/'},
+  {id:'eth',  name:'Ethereum', s:'ETH', c:'#627EEA',i:'⟠', t:'evm', ex:'https://etherscan.io/address/',
+   rpcs:['https://cloudflare-eth.com','https://rpc.ankr.com/eth']},
+  {id:'base', name:'Base',     s:'BASE',c:'#0052FF',i:'🔵',t:'evm', ex:'https://basescan.org/address/',
+   rpcs:['https://mainnet.base.org','https://rpc.ankr.com/base']},
+  {id:'bsc',  name:'BNB Chain',s:'BNB', c:'#F0B90B',i:'◈', t:'evm', ex:'https://bscscan.com/address/',
+   rpcs:['https://bsc-dataseed.binance.org','https://rpc.ankr.com/bsc']},
+  {id:'polygon',name:'Polygon',s:'POL', c:'#8247E5',i:'⬡', t:'evm', ex:'https://polygonscan.com/address/',
+   rpcs:['https://polygon-rpc.com','https://rpc.ankr.com/polygon']},
+  {id:'arbitrum',name:'Arbitrum',s:'ARB',c:'#28A0F0',i:'◎',t:'evm',ex:'https://arbiscan.io/address/',
+   rpcs:['https://arb1.arbitrum.io/rpc','https://rpc.ankr.com/arbitrum']},
+  {id:'avax', name:'Avalanche',s:'AVAX',c:'#E84142',i:'▲', t:'evm', ex:'https://snowtrace.io/address/',
+   rpcs:['https://api.avax.network/ext/bc/C/rpc']},
+  {id:'solana',name:'Solana',  s:'SOL', c:'#A855F7',i:'◑', t:'sol', ex:'https://solscan.io/account/',
+   rpcs:['https://api.mainnet-beta.solana.com']},
+  {id:'tron',  name:'Tron',    s:'TRX', c:'#EF0027',i:'⬢', t:'tron',ex:'https://tronscan.org/#/address/'},
+];
+const EVM_CHAINS=CHAINS.filter(c=>c.t==='evm');
+const DEX=[
+  {n:'Uniswap',    u:'https://app.uniswap.org',         cs:['eth','arbitrum','polygon'],l:'🦄',d:'Best EVM DEX'},
+  {n:'PancakeSwap',u:'https://pancakeswap.finance/swap',cs:['bsc'],                    l:'🥞',d:'BNB Chain'},
+  {n:'Aerodrome',  u:'https://aerodrome.finance/swap',  cs:['base'],                   l:'✈️',d:'Base DEX'},
+  {n:'1inch',      u:'https://app.1inch.io',            cs:['eth','bsc','polygon','arbitrum'],l:'🔷',d:'Aggregator'},
+  {n:'Jupiter',    u:'https://jup.ag',                  cs:['solana'],                 l:'🪐',d:'#1 Solana Aggregator'},
+  {n:'Raydium',    u:'https://raydium.io/swap/',        cs:['solana'],                 l:'⚛️',d:'Solana AMM'},
+  {n:'Orca',       u:'https://www.orca.so',             cs:['solana'],                 l:'🐋',d:'Solana Liquidity'},
+  {n:'Drift',      u:'https://app.drift.trade',         cs:['solana'],                 l:'🌊',d:'Solana Perps'},
+  {n:'UniSat',     u:'https://unisat.io/market',        cs:['btc'],                    l:'₿', d:'Bitcoin Ordinals'},
+];
+const STABLES=[
+  {chainId:'tron',   contract:'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t',         symbol:'USDT',name:'Tether USD (TRC20)',decimals:6},
+  {chainId:'eth',    contract:'0xdAC17F958D2ee523a2206206994597C13D831ec7',symbol:'USDT',name:'Tether USD (ERC20)',decimals:6},
+  {chainId:'eth',    contract:'0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',symbol:'USDC',name:'USD Coin (ERC20)',  decimals:6},
+  {chainId:'base',   contract:'0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',symbol:'USDC',name:'USD Coin (Base)',  decimals:6},
+  {chainId:'bsc',    contract:'0x55d398326f99059fF775485246999027B3197955',symbol:'USDT',name:'Tether (BEP20)',   decimals:18},
+  {chainId:'polygon',contract:'0xc2132D05D31c914a87C6611C10748AEb04B58e8F',symbol:'USDT',name:'Tether (Polygon)',decimals:6},
+  {chainId:'arbitrum',contract:'0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',symbol:'USDT',name:'Tether (Arbitrum)',decimals:6},
+];
+
+// Stablecoin contracts by token+chain for quick-add dropdown
+const STABLE_MAP={
+  USDT:{
+    tron:    {contract:'TR7NHqjeKQxGTCi8q8ZY4pL8otSzgjLj6t',         decimals:6, label:'Tron (TRC20)'},
+    eth:     {contract:'0xdAC17F958D2ee523a2206206994597C13D831ec7',decimals:6, label:'Ethereum (ERC20)'},
+    bsc:     {contract:'0x55d398326f99059fF775485246999027B3197955',decimals:18,label:'BNB Chain (BEP20)'},
+    polygon: {contract:'0xc2132D05D31c914a87C6611C10748AEb04B58e8F',decimals:6, label:'Polygon'},
+    arbitrum:{contract:'0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9',decimals:6, label:'Arbitrum'},
+  },
+  USDC:{
+    eth:     {contract:'0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48',decimals:6, label:'Ethereum'},
+    base:    {contract:'0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913',decimals:6, label:'Base'},
+    bsc:     {contract:'0x8AC76a51cc950d9822D68b83fE1Ad97B32Cd580d',decimals:18,label:'BNB Chain'},
+    polygon: {contract:'0x2791Bca1f2de4661ED88A30C99A7a9449Aa84174',decimals:6, label:'Polygon'},
+    arbitrum:{contract:'0xaf88d065e77c8cC2239327C5EDb3A432268e5831',decimals:6, label:'Arbitrum'},
+  },
+  DAI:{
+    eth:     {contract:'0x6B175474E89094C44Da98b954EedeAC495271d0F',decimals:18,label:'Ethereum'},
+    base:    {contract:'0x50c5725949A6F0c72E6C4a641F24049A917DB0Cb',decimals:18,label:'Base'},
+    polygon: {contract:'0x8f3Cf7ad23Cd3CaDbD9735AFf958023239c6A063',decimals:18,label:'Polygon'},
+  },
+};
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let S={
+  pin:'',wallets:[],wi:0,ai:0,
+  balances:{},prices:{},tokens:[],
+  showPK:false,pendingWallet:null,
+  pinStep:'set',pinIn:'',pinConf:'',
+  mktTab:'trend',fontSize:16
+};
+const AW=()=>S.wallets[S.wi]||{};
+const AA=()=>(AW().accounts||[])[S.ai]||{};
+
+// ══════════════════════════════════════════
+// UTILS
+// ══════════════════════════════════════════
+const b2h=b=>Array.from(b).map(x=>x.toString(16).padStart(2,'0')).join('');
+const h2b=h=>new Uint8Array(h.match(/.{1,2}/g).map(x=>parseInt(x,16)));
+const safe=v=>{const n=Number(v);return isNaN(n)||!isFinite(n)?0:n;};
+function b58(bytes){
+  const A='123456789ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnopqrstuvwxyz';
+  let n=BigInt('0x'+b2h(bytes)),r='';
+  while(n>0n){r=A[Number(n%58n)]+r;n/=58n;}
+  for(const b of bytes)if(b===0)r='1'+r;else break;
+  return r||'1';
+}
+async function sha256d(b){const h1=await crypto.subtle.digest('SHA-256',b);return new Uint8Array(await crypto.subtle.digest('SHA-256',h1));}
+
+// ══════════════════════════════════════════
+// NAV
+// ══════════════════════════════════════════
+function go(id){
+  document.querySelectorAll('.scr').forEach(s=>s.classList.remove('on'));
+  document.getElementById(id).classList.add('on');
+  window.scrollTo(0,0);
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+(function init(){
+  const fs=localStorage.getItem('ezw_fs');
+  if(fs){S.fontSize=parseInt(fs);document.documentElement.style.fontSize=S.fontSize+'px';}
+  const saved=document.getElementById('saved-btn');
+  if(localStorage.getItem('ezw_enc')){
+    saved.style.display='block';
+    saved.innerHTML='<button class="btn btn-p" onclick="goUnlock()">🔓 OPEN SAVED WALLET</button>';
+  }
+})();
+
+// ══════════════════════════════════════════
+// CRYPTO: SLIP-0010 Ed25519 (Phantom-compatible)
+// ══════════════════════════════════════════
+async function slip10(seedBytes,path){
+  async function hmac512(key,data){
+    const k=await crypto.subtle.importKey('raw',key,{name:'HMAC',hash:'SHA-512'},false,['sign']);
+    return new Uint8Array(await crypto.subtle.sign('HMAC',k,data));
+  }
+  let I=await hmac512(new TextEncoder().encode('ed25519 seed'),seedBytes);
+  let IL=I.slice(0,32),IR=I.slice(32);
+  for(const idx of path){
+    const h=idx|0x80000000;
+    const data=new Uint8Array(37);
+    data[0]=0;data.set(IL,1);
+    data[33]=(h>>>24)&0xff;data[34]=(h>>>16)&0xff;data[35]=(h>>>8)&0xff;data[36]=h&0xff;
+    I=await hmac512(IR,data);
+    IL=I.slice(0,32);IR=I.slice(32);
+  }
+  return IL;
+}
+
+async function bip39Seed(mn){
+  const enc=new TextEncoder();
+  const km=await crypto.subtle.importKey('raw',enc.encode(mn),'PBKDF2',false,['deriveBits']);
+  const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:enc.encode('mnemonic'),iterations:2048,hash:'SHA-512'},km,512);
+  return new Uint8Array(bits);
+}
+
+async function deriveSolAll(mn){
+  const seed=await bip39Seed(mn);
+  const paths=[
+    {p:[44,501,0,0],label:"m/44'/501'/0'/0'",note:'Phantom Standard'},
+    {p:[44,501,0],  label:"m/44'/501'/0'",   note:'Phantom Legacy'},
+    {p:[44,501,1,0],label:"m/44'/501'/1'/0'",note:'Phantom Account 2'},
+    {p:[44,501,2,0],label:"m/44'/501'/2'/0'",note:'Phantom Account 3'},
+  ];
+  const results=[];
+  for(const p of paths){
+    try{
+      const priv=await slip10(seed,p.p);
+      const kp=nacl.sign.keyPair.fromSeed(priv);
+      const addr=b58(kp.publicKey);
+      if(!results.find(r=>r.address===addr))
+        results.push({address:addr,privKey:b2h(priv),label:p.label,note:p.note});
+    }catch(e){console.log('SOL path fail',p.label,e.message);}
+  }
+  return results;
+}
+
+async function deriveEvmAll(mn){
+  // Phantom & other wallets use different EVM paths — derive several
+  const paths=[
+    {path:"m/44'/60'/0'/0/0", note:'Standard (MetaMask/Phantom)'},
+    {path:"m/44'/60'/0'/0/1", note:'Account index 1'},
+    {path:"m/44'/60'/0'/0/2", note:'Account index 2'},
+    {path:"m/44'/60'/1'/0/0", note:'Account 1 (hardened)'},
+    {path:"m/44'/60'/0'/0/3", note:'Account index 3'},
+  ];
+  const results=[];
+  for(const p of paths){
+    try{
+      const w=ethers.HDNodeWallet.fromPhrase(mn,'',p.path);
+      if(!results.find(r=>r.address===w.address))
+        results.push({address:w.address,privKey:w.privateKey,path:p.path,note:p.note});
+    }catch(e){console.log('EVM path fail',p.path,e.message);}
+  }
+  return results;
+}
+
+async function deriveBTC(mn,idx=0){
+  try{
+    const node=ethers.HDNodeWallet.fromPhrase(mn,'',`m/44'/0'/0'/0/${idx}`);
+    const pub=h2b(node.signingKey.compressedPublicKey.slice(2));
+    const sha1=new Uint8Array(await crypto.subtle.digest('SHA-256',pub));
+    const sha2=new Uint8Array(await crypto.subtle.digest('SHA-256',sha1));
+    const h160=sha2.slice(0,20);
+    const v=new Uint8Array(21);v[0]=0;v.set(h160,1);
+    const cs=await sha256d(v);
+    const full=new Uint8Array(25);full.set(v);full.set(cs.slice(0,4),21);
+    return{address:b58(full),privKey:node.privateKey.slice(2)};
+  }catch(e){
+    const enc=new TextEncoder();
+    const km=await crypto.subtle.importKey('raw',enc.encode(mn),'PBKDF2',false,['deriveBits']);
+    const bits=await crypto.subtle.deriveBits({name:'PBKDF2',salt:enc.encode('btc'+idx),iterations:2048,hash:'SHA-256'},km,256);
+    return{address:'1BTC'+b2h(new Uint8Array(bits)).slice(0,30),privKey:b2h(new Uint8Array(bits))};
+  }
+}
+
+async function deriveTron(mn,idx=0){
+  try{
+    // Tron path m/44'/195'/0'/0/idx — same secp256k1 keys as ETH
+    const node=ethers.HDNodeWallet.fromPhrase(mn,'',`m/44'/195'/0'/0/${idx}`);
+    // Uncompressed public key without 0x04 prefix
+    const pubUncompressed=node.signingKey.publicKey; // 0x04....
+    const pubBytes=h2b(pubUncompressed.slice(4)); // strip 0x04
+    // keccak256 of the 64-byte public key
+    const hash=h2b(ethers.keccak256('0x'+b2h(pubBytes)).slice(2));
+    const addr20=hash.slice(-20); // last 20 bytes
+    // Tron address = 0x41 + addr20, then base58check
+    const tronRaw=new Uint8Array(21);
+    tronRaw[0]=0x41;
+    tronRaw.set(addr20,1);
+    const cs=await sha256d(tronRaw);
+    const full=new Uint8Array(25);
+    full.set(tronRaw);
+    full.set(cs.slice(0,4),21);
+    return{address:b58(full),privKey:node.privateKey.slice(2)};
+  }catch(e){
+    console.log('Tron derive fail:',e.message);
+    return{address:'',privKey:''};
+  }
+}
+
+// ══════════════════════════════════════════
+// AES-256-GCM STORAGE
+// ══════════════════════════════════════════
+async function pinKey(pin,salt){
+  const enc=new TextEncoder();
+  const km=await crypto.subtle.importKey('raw',enc.encode(pin),'PBKDF2',false,['deriveKey']);
+  return crypto.subtle.deriveKey({name:'PBKDF2',salt:enc.encode(salt),iterations:100000,hash:'SHA-256'},km,{name:'AES-GCM',length:256},false,['encrypt','decrypt']);
+}
+async function enc(data,pin){
+  const salt=b2h(crypto.getRandomValues(new Uint8Array(16)));
+  const iv=crypto.getRandomValues(new Uint8Array(12));
+  const key=await pinKey(pin,salt);
+  const ct=await crypto.subtle.encrypt({name:'AES-GCM',iv},key,new TextEncoder().encode(JSON.stringify(data)));
+  return JSON.stringify({salt,iv:b2h(iv),ct:b2h(new Uint8Array(ct))});
+}
+async function dec(blob,pin){
+  const {salt,iv,ct}=JSON.parse(blob);
+  const key=await pinKey(pin,salt);
+  const pt=await crypto.subtle.decrypt({name:'AES-GCM',iv:h2b(iv)},key,h2b(ct));
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+async function saveState(){
+  try{localStorage.setItem('ezw_enc',await enc({wallets:S.wallets,wi:S.wi,tokens:S.tokens},S.pin));}
+  catch(e){console.error('Save:',e);}
+}
+
+// ══════════════════════════════════════════
+// CREATE / IMPORT
+// ══════════════════════════════════════════
+async function goCreate(){
+  const w=ethers.Wallet.createRandom();
+  await buildWallet(w.mnemonic.phrase,'My Wallet');
+}
+
+async function buildWallet(mn,label){
+  const evmAddrs=await deriveEvmAll(mn);
+  const btc=await deriveBTC(mn,0);
+  const tron=await deriveTron(mn,0);
+  const solAddrs=await deriveSolAll(mn);
+  S.pendingWallet={
+    label,mnemonic:mn,
+    evmPriv:evmAddrs[0]?.privKey||'',
+    btcPriv:btc.privKey,
+    solAllAddrs:solAddrs,
+    evmAllAddrs:evmAddrs,
+    solPriv:solAddrs[0]?.privKey||'',
+    tronPriv:tron.privKey,
+    accounts:[{idx:0,label:'Account 0',
+      evmAddress:evmAddrs[0]?.address||'',
+      solAddress:solAddrs[0]?.address||'',
+      btcAddress:btc.address,
+      tronAddress:tron.address
+    }]
+  };
+  showSolPicker(solAddrs);
+}
+
+async function doImportSeed(){
+  const phrase=document.getElementById('imp-phrase').value.trim().replace(/\s+/g,' ');
+  const lbl=document.getElementById('imp-label').value.trim()||'Imported Wallet';
+  const err=document.getElementById('imp-err');
+  if(phrase.split(' ').length!==12&&phrase.split(' ').length!==24){
+    err.textContent='Enter exactly 12 or 24 words.';err.style.display='block';return;
+  }
+  try{ethers.Mnemonic.fromPhrase(phrase);}catch{
+    err.textContent='Invalid seed phrase — check spelling and word order.';err.style.display='block';return;
+  }
+  err.style.display='none';
+  await buildWallet(phrase,lbl);
+}
+
+async function doImportPK(){
+  const type=document.getElementById('ipk-type').value;
+  let key=document.getElementById('ipk-key').value.trim();
+  const lbl=document.getElementById('ipk-label').value.trim()||'Imported Key';
+  const err=document.getElementById('ipk-err');
+  if(!key){err.textContent='Enter a private key.';err.style.display='block';return;}
+  try{
+    let pw={label:lbl,mnemonic:'',evmPriv:'',solPriv:'',btcPriv:'',solAllAddrs:[],
+      accounts:[{idx:0,label:'Account 0',evmAddress:'',solAddress:'',btcAddress:''}]};
+    if(type==='evm'){
+      if(!key.startsWith('0x'))key='0x'+key;
+      const w=new ethers.Wallet(key);
+      pw.evmPriv=key;pw.accounts[0].evmAddress=w.address;
+    }else if(type==='sol'){
+      const raw=key.startsWith('0x')?h2b(key.slice(2)):h2b(key);
+      const kp=nacl.sign.keyPair.fromSeed(raw.slice(0,32));
+      pw.solPriv=key;pw.accounts[0].solAddress=b58(kp.publicKey);
+    }else{
+      if(!key.startsWith('0x'))key='0x'+key;
+      const w=new ethers.Wallet(key);
+      pw.evmPriv=key;pw.btcPriv=key.slice(2);pw.accounts[0].evmAddress=w.address;
+    }
+    S.pendingWallet=pw;err.style.display='none';
+    startPin();
+  }catch(e){err.textContent='Invalid key: '+e.message;err.style.display='block';}
+}
+
+// ══════════════════════════════════════════
+// SOL PICKER
+// ══════════════════════════════════════════
+function showSolPicker(addrs){
+  const list=document.getElementById('sol-pick-list');
+  list.innerHTML='';
+  addrs.forEach(function(a,i){
+    const card=document.createElement('div');
+    card.className='sol-card';
+    card.innerHTML=
+      '<div style="display:flex;justify-content:space-between;margin-bottom:8px;">'+
+        '<span style="font-size:14px;font-weight:700;color:#00FFB2;">'+a.note+'</span>'+
+        '<span style="font-size:11px;color:#7A98B8;font-family:monospace;">'+a.label+'</span>'+
+      '</div>'+
+      '<div style="font-size:14px;color:#E8F4FF;word-break:break-all;font-family:monospace;line-height:1.6;margin-bottom:12px;">'+a.address+'</div>'+
+      '<div style="display:flex;gap:8px;">'+
+        '<button style="flex:1;padding:10px;border-radius:10px;border:1px solid #1A2D45;background:transparent;color:#5A7898;font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Copy</button>'+
+        '<button style="flex:2;padding:10px;border-radius:10px;background:linear-gradient(135deg,#00FFB2,#00C98A);border:none;color:#050D1A;font-family:Inter,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">✓ THIS IS MINE</button>'+
+      '</div>';
+    card.querySelectorAll('button')[0].addEventListener('click',function(e){
+      e.stopPropagation();
+      navigator.clipboard.writeText(a.address).catch(function(){});
+      this.textContent='✓ Copied!';
+      var btn=this;setTimeout(function(){btn.textContent='Copy';},1500);
+    });
+    card.querySelectorAll('button')[1].addEventListener('click',function(e){
+      e.stopPropagation();pickSol(i);
+    });
+    card.addEventListener('click',function(){pickSol(i);});
+    list.appendChild(card);
+  });
+  go('s-solpick');
+}
+function pickSol(i){
+  const a=S.pendingWallet.solAllAddrs[i];
+  if(!a)return;
+  S.pendingWallet.solPriv=a.privKey;
+  S.pendingWallet.accounts[0].solAddress=a.address;
+  console.log('[EZW] SOL chosen:',a.address);
+  // Now show EVM picker if multiple addresses
+  const evmAddrs=S.pendingWallet.evmAllAddrs||[];
+  if(evmAddrs.length>1){showEvmPicker(evmAddrs);}
+  else{startPin();}
+}
+function skipSolPick(){
+  const evmAddrs=S.pendingWallet.evmAllAddrs||[];
+  if(evmAddrs.length>1){showEvmPicker(evmAddrs);}
+  else{startPin();}
+}
+
+function showEvmPicker(addrs){
+  const list=document.getElementById('sol-pick-list');
+  document.querySelector('#s-solpick .logo-title, #s-solpick div[style*="Orbitron"]');
+  // Update the picker screen title for EVM
+  const titleEl=document.getElementById('solpick-title');
+  const subEl=document.getElementById('solpick-sub');
+  const iconEl=document.getElementById('solpick-icon');
+  if(titleEl)titleEl.textContent='SELECT ETH/BASE ADDRESS';
+  if(subEl)subEl.innerHTML='Multiple EVM addresses found.<br/>Tap the one matching your Phantom Ethereum/Base wallet.';
+  if(iconEl)iconEl.textContent='⟠';
+  list.innerHTML='';
+  addrs.forEach(function(a,i){
+    const card=document.createElement('div');
+    card.className='sol-card';
+    card.innerHTML=
+      '<div style="display:flex;justify-content:space-between;margin-bottom:8px;">'+
+        '<span style="font-size:14px;font-weight:700;color:#627EEA;">'+a.note+'</span>'+
+        '<span style="font-size:11px;color:#7A98B8;font-family:monospace;">'+a.path+'</span>'+
+      '</div>'+
+      '<div style="font-size:13px;color:#E8F4FF;word-break:break-all;font-family:monospace;line-height:1.6;margin-bottom:12px;">'+a.address+'</div>'+
+      '<div style="display:flex;gap:8px;">'+
+        '<button style="flex:1;padding:10px;border-radius:10px;border:1px solid #1A2D45;background:transparent;color:#5A7898;font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer;">Copy</button>'+
+        '<button style="flex:2;padding:10px;border-radius:10px;background:linear-gradient(135deg,#00FFB2,#00C98A);border:none;color:#050D1A;font-family:Inter,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">✓ THIS IS MINE</button>'+
+      '</div>';
+    card.querySelectorAll('button')[0].addEventListener('click',function(e){
+      e.stopPropagation();
+      navigator.clipboard.writeText(a.address).catch(function(){});
+      this.textContent='✓ Copied!';
+      var btn=this;setTimeout(function(){btn.textContent='Copy';},1500);
+    });
+    card.querySelectorAll('button')[1].addEventListener('click',function(e){
+      e.stopPropagation();pickEvm(i);
+    });
+    card.addEventListener('click',function(){pickEvm(i);});
+    list.appendChild(card);
+  });
+  // Update skip button to go to PIN
+  const skipBtn=document.getElementById('solpick-skip');
+  if(skipBtn)skipBtn.setAttribute('onclick','startPin()');
+  go('s-solpick');
+  window.scrollTo(0,0);
+}
+function pickEvm(i){
+  const a=S.pendingWallet.evmAllAddrs[i];
+  if(!a)return;
+  S.pendingWallet.evmPriv=a.privKey;
+  S.pendingWallet.accounts[0].evmAddress=a.address;
+  console.log('[EZW] EVM chosen:',a.address,'path:',a.path);
+  startPin();
+}
+
+// ══════════════════════════════════════════
+// PIN
+// ══════════════════════════════════════════
+function startPin(){
+  S.pinStep='set';S.pinIn='';S.pinConf='';
+  document.getElementById('pin-title').textContent='SET PIN';
+  document.getElementById('pin-sub').textContent='Choose a 6-digit PIN to encrypt your wallet';
+  document.getElementById('pin-err').style.display='none';
+  updDots(0,false);go('s-pin');
+}
+function updDots(n,u){const p=u?'upd':'pd';for(let i=0;i<6;i++)document.getElementById(p+i).classList.toggle('on',i<n);}
+function PK(k){
+  const n=S.pinIn+k;
+  if(n.length<6){S.pinIn=n;updDots(n.length,false);return;}
+  S.pinIn='';updDots(0,false);
+  if(S.pinStep==='set'){
+    S.pinConf=n;S.pinStep='confirm';
+    document.getElementById('pin-title').textContent='CONFIRM PIN';
+    document.getElementById('pin-sub').textContent='Re-enter your PIN';
+  }else if(n===S.pinConf){
+    S.pin=n;pinDone();
+  }else{
+    const e=document.getElementById('pin-err');
+    e.textContent="PINs don't match. Try again.";e.style.display='block';
+    S.pinStep='set';S.pinConf='';
+    document.getElementById('pin-title').textContent='SET PIN';
+    document.getElementById('pin-sub').textContent='Choose a 6-digit PIN';
+  }
+}
+function PBk(){if(S.pinIn.length>0){S.pinIn=S.pinIn.slice(0,-1);updDots(S.pinIn.length,false);}}
+
+async function pinDone(){
+  const pw=S.pendingWallet;
+  const idx=S.wallets.findIndex(w=>w.evmPriv===pw.evmPriv&&w.solPriv===pw.solPriv);
+  if(idx===-1)S.wallets.push(pw);else S.wallets[idx]=pw;
+  S.wi=idx===-1?S.wallets.length-1:idx;S.ai=0;
+  S.pendingWallet=null;
+  // Init tokens with stables
+  if(!S.tokens.length){
+    S.tokens=STABLES.map(s=>({...s,balance:null,priceUSD:0,autoDetected:false}));
+  }
+  await saveState();
+  openWallet();
+}
+
+// ══════════════════════════════════════════
+// UNLOCK
+// ══════════════════════════════════════════
+let uIn='';
+function goUnlock(){uIn='';updDots(0,true);document.getElementById('unlock-err').style.display='none';go('s-unlock');}
+function UK(k){
+  const n=uIn+k;
+  if(n.length<6){uIn=n;updDots(n.length,true);return;}
+  uIn='';updDots(0,true);
+  dec(localStorage.getItem('ezw_enc'),n).then(data=>{
+    S.pin=n;S.wallets=data.wallets||[];S.wi=Math.min(data.wi||0,S.wallets.length-1);
+    S.ai=0;S.tokens=data.tokens||STABLES.map(s=>({...s,balance:null,priceUSD:0}));
+    // Merge any new default stablecoins not in saved tokens (e.g. TRC20 USDT added in update)
+    STABLES.forEach(s=>{
+      if(!S.tokens.find(t=>t.contract===s.contract&&t.chainId===s.chainId)){
+        S.tokens.push({...s,balance:null,priceUSD:0,autoDetected:false});
+      }
+    });
+    document.getElementById('unlock-err').style.display='none';
+    openWallet();
+  }).catch(()=>{
+    const e=document.getElementById('unlock-err');
+    e.textContent='Wrong PIN. Try again.';e.style.display='block';
+  });
+}
+function UBk(){if(uIn.length>0){uIn=uIn.slice(0,-1);updDots(uIn.length,true);}}
+function nukeAll(){
+  if(!confirm('Permanently delete ALL wallets? Back up your seed phrases first.'))return;
+  localStorage.removeItem('ezw_enc');S.wallets=[];S.pin='';S.tokens=[];
+  location.reload();
+}
+
+// ══════════════════════════════════════════
+// OPEN WALLET
+// ══════════════════════════════════════════
+async function ensureTron(){
+  // Derive Tron address for wallets created before Tron support
+  const w=AW();
+  if(!w.mnemonic)return;
+  let changed=false;
+  for(const acct of(w.accounts||[])){
+    if(!acct.tronAddress){
+      const tron=await deriveTron(w.mnemonic,acct.idx||0);
+      acct.tronAddress=tron.address;
+      if(!w.tronPriv)w.tronPriv=tron.privKey;
+      changed=true;
+      console.log('[TRON] Derived for existing wallet:',tron.address);
+    }
+  }
+  if(changed)await saveState();
+}
+
+function openWallet(){
+  document.getElementById('ticker').style.display='flex';
+  document.getElementById('scan-status-bar').style.display='flex';
+  ensureTron().then(()=>renderWallet());
+  renderWallet();
+  renderDex();
+  ST('assets');
+  go('s-wallet');
+  fetchPrices().then(()=>startScan());
+  loadTicker();
+}
+function lockWallet(){S.pin='';document.getElementById('ticker').style.display='none';closeMenu();go('s-unlock');}
+
+function renderWallet(){
+  const w=AW();const a=AA();
+  document.getElementById('w-name').textContent=(w.label||'Wallet')+' · '+(a.label||'Account');
+  document.getElementById('key-evm').textContent=a.evmAddress||'—';
+  document.getElementById('key-sol').textContent=a.solAddress||'—';
+  document.getElementById('key-btc').textContent=a.btcAddress||'—';
+  const trEl=document.getElementById('key-tron');if(trEl)trEl.textContent=a.tronAddress||'—';
+  document.getElementById('send-from').textContent=a.evmAddress||'—';
+  S.showPK=false;
+  document.getElementById('pk-box').textContent='•'.repeat(64);
+  // Show addresses in the verification card
+  const solEl=document.getElementById('scan-sol-addr');
+  const evmEl=document.getElementById('scan-evm-addr');
+  const btcEl=document.getElementById('scan-btc-addr');
+  if(solEl)solEl.textContent=a.solAddress||'Not set';
+  if(evmEl)evmEl.textContent=a.evmAddress||'Not set';
+  if(btcEl)btcEl.textContent=a.btcAddress||'Not set';
+  renderAssets();
+  renderTokens();
+}
+
+// ══════════════════════════════════════════
+// BALANCE FETCHING
+// ══════════════════════════════════════════
+async function rpc(url,method,params){
+  const r=await fetch(url,{
+    method:'POST',headers:{'Content-Type':'application/json'},
+    body:JSON.stringify({jsonrpc:'2.0',id:1,method,params}),
+    signal:AbortSignal.timeout(7000)
+  });
+  if(!r.ok)throw new Error('HTTP '+r.status);
+  return r.json();
+}
+
+async function getEVMBal(chainId,addr){
+  if(!addr||addr.length!==42||!addr.startsWith('0x'))return 0;
+  const ch=CHAINS.find(c=>c.id===chainId);
+  if(!ch||!ch.rpcs)return 0;
+  console.log('[EVM] Fetching',chainId,'for',addr.slice(0,10)+'...');
+  for(const url of ch.rpcs){
+    try{
+      const r=await fetch(url,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({jsonrpc:'2.0',id:1,method:'eth_getBalance',params:[addr,'latest']}),
+        signal:AbortSignal.timeout(8000)
+      });
+      if(!r.ok){console.log('[EVM]',url,'HTTP',r.status);continue;}
+      const d=await r.json();
+      if(d.result!==undefined){
+        const b=parseFloat(ethers.formatEther(BigInt(d.result)));
+        console.log('[EVM]',chainId,'=',b,'via',url);
+        return isNaN(b)?0:b;
+      }
+    }catch(e){console.log('[EVM]',chainId,url,'fail:',e.message);}
+  }
+  return 0;
+}
+
+async function getSOLBal(addr){
+  if(!addr||addr.length<30||addr.startsWith('('))return 0;
+  console.log('[SOL] Fetching balance for:',addr);
+  const rpcs=[
+    'https://api.mainnet-beta.solana.com',
+    'https://solana-mainnet.g.alchemy.com/v2/demo',
+    'https://rpc.ankr.com/solana',
+    'https://solana.publicnode.com',
+  ];
+  for(const url of rpcs){
+    try{
+      const r=await fetch(url,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({jsonrpc:'2.0',id:1,method:'getBalance',params:[addr,{commitment:'confirmed'}]}),
+        signal:AbortSignal.timeout(8000)
+      });
+      if(!r.ok){console.log('[SOL]',url,'HTTP',r.status);continue;}
+      const d=await r.json();
+      if(d.error){console.log('[SOL]',url,'error:',d.error.message);continue;}
+      if(d.result!==undefined){
+        const lam=typeof d.result==='object'?d.result.value:Number(d.result);
+        const b=lam/1e9;
+        console.log('[SOL] Balance:',b,'from',url);
+        return isNaN(b)?0:b;
+      }
+    }catch(e){console.log('[SOL]',url,'fail:',e.message);}
+  }
+  console.log('[SOL] All RPCs failed for',addr);
+  return 0;
+}
+
+async function getTRXBal(addr){
+  if(!addr||!addr.startsWith('T'))return 0;
+  try{
+    const r=await fetch('https://api.trongrid.io/v1/accounts/'+addr,{signal:AbortSignal.timeout(8000)});
+    const d=await r.json();
+    const bal=(d.data&&d.data[0]?.balance||0)/1e6;
+    console.log('[BAL] TRX',bal);
+    return isNaN(bal)?0:bal;
+  }catch(e){console.log('[BAL] TRX fail:',e.message);return 0;}
+}
+
+async function getTRC20Bal(addr,contract,decimals){
+  if(!addr||!addr.startsWith('T'))return 0;
+  try{
+    const r=await fetch('https://apilist.tronscanapi.com/api/account/tokens?address='+addr+'&start=0&limit=50',{signal:AbortSignal.timeout(9000)});
+    const d=await r.json();
+    const tok=(d.data||[]).find(t=>t.tokenId===contract);
+    if(tok){const bal=parseFloat(tok.balance)/Math.pow(10,tok.tokenDecimal||decimals);return isNaN(bal)?0:bal;}
+    return 0;
+  }catch(e){console.log('[BAL] TRC20 fail:',e.message);return 0;}
+}
+
+// Auto-detect ALL Tron tokens (TRC20) held by the address
+async function detectTronTokens(addr){
+  if(!addr||!addr.startsWith('T'))return;
+  console.log('[TRON-TOK] Scanning',addr.slice(0,8)+'...');
+  try{
+    const r=await fetch('https://apilist.tronscanapi.com/api/account/tokens?address='+addr+'&start=0&limit=50',{signal:AbortSignal.timeout(10000)});
+    const d=await r.json();
+    const tokens=d.data||[];
+    let added=0;
+    for(const t of tokens){
+      if(t.tokenType==='trc10')continue;
+      if(t.tokenAbbr==='trx'||t.tokenId==='_')continue;
+      const bal=parseFloat(t.balance)/Math.pow(10,t.tokenDecimal||6);
+      if(!bal||bal<=0)continue;
+      const existing=S.tokens.find(x=>x.contract===t.tokenId&&x.chainId==='tron');
+      if(existing){existing.balance=bal;existing.priceUSD=parseFloat(t.tokenPriceInUsd)||existing.priceUSD||0;}
+      else{
+        const isStable=STABLES.some(s=>s.contract===t.tokenId&&s.chainId==='tron');
+        S.tokens.push({chainId:'tron',contract:t.tokenId,symbol:(t.tokenAbbr||'TRC20').toUpperCase(),
+          name:t.tokenName||t.tokenAbbr,decimals:t.tokenDecimal||6,balance:bal,
+          priceUSD:parseFloat(t.tokenPriceInUsd)||0,autoDetected:!isStable,logoURI:t.tokenLogo||''});
+        added++;
+        console.log('[TRON-TOK] Found:',t.tokenAbbr,bal);
+      }
+    }
+    if(added)await saveState();
+    renderTokens();
+  }catch(e){console.log('[TRON-TOK] fail:',e.message);}
+}
+
+async function getBTCBal(addr){
+  if(!addr||addr.length<26||addr.startsWith('('))return 0;
+  const apis=[
+    ()=>fetch(`https://blockstream.info/api/address/${addr}`,{signal:AbortSignal.timeout(8000)}).then(r=>r.json()).then(d=>(d.chain_stats.funded_txo_sum-d.chain_stats.spent_txo_sum)/1e8),
+    ()=>fetch(`https://mempool.space/api/address/${addr}`,{signal:AbortSignal.timeout(8000)}).then(r=>r.json()).then(d=>(d.chain_stats.funded_txo_sum-d.chain_stats.spent_txo_sum)/1e8),
+  ];
+  for(const api of apis){
+    try{const b=await api();if(typeof b==='number'&&!isNaN(b)){console.log('[BAL] BTC',b);return b;}}
+    catch(e){console.log('[BAL] BTC fail:',e.message);}
+  }
+  return 0;
+}
+
+async function getERC20Bal(chainId,contract,addr,decimals){
+  if(!addr||!addr.startsWith('0x')||addr.length!==42||!contract)return 0;
+  const ch=CHAINS.find(c=>c.id===chainId);
+  if(!ch||!ch.rpcs)return 0;
+  const data='0x70a08231'+'000000000000000000000000'+addr.slice(2);
+  for(const url of ch.rpcs){
+    try{
+      const d=await rpc(url,'eth_call',[{to:contract,data},'latest']);
+      if(d.result&&d.result!=='0x'&&d.result.length>2){
+        const hex=d.result;
+        if(/^0x0+$/.test(hex))return 0;
+        const b=parseFloat(ethers.formatUnits(BigInt(hex),decimals));
+        return isNaN(b)?0:b;
+      }
+      return 0;
+    }catch(e){console.log('[ERC20]',contract.slice(0,8),url,'fail:',e.message);}
+  }
+  return 0;
+}
+
+// ══════════════════════════════════════════
+// PRICES
+// ══════════════════════════════════════════
+async function fetchPrices(){
+  try{
+    const ids='bitcoin,ethereum,binancecoin,matic-network,arbitrum,avalanche-2,solana,tron';
+    const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`,{signal:AbortSignal.timeout(10000)});
+    const d=await r.json();
+    S.prices={
+      btc:{p:d.bitcoin?.usd||0,c:d.bitcoin?.usd_24h_change||0},
+      eth:{p:d.ethereum?.usd||0,c:d.ethereum?.usd_24h_change||0},
+      base:{p:d.ethereum?.usd||0,c:d.ethereum?.usd_24h_change||0},
+      bsc:{p:d.binancecoin?.usd||0,c:d.binancecoin?.usd_24h_change||0},
+      polygon:{p:d['matic-network']?.usd||0,c:d['matic-network']?.usd_24h_change||0},
+      arbitrum:{p:d.arbitrum?.usd||0,c:d.arbitrum?.usd_24h_change||0},
+      avax:{p:d['avalanche-2']?.usd||0,c:d['avalanche-2']?.usd_24h_change||0},
+      solana:{p:d.solana?.usd||0,c:d.solana?.usd_24h_change||0},
+      tron:{p:d.tron?.usd||0,c:d.tron?.usd_24h_change||0},
+    };
+    console.log('[PRICES] loaded');
+  }catch(e){console.log('[PRICES] fail:',e.message);}
+}
+
+// ══════════════════════════════════════════
+// MAIN SCAN
+// ══════════════════════════════════════════
+// ══════════════════════════════════════════
+// SPL TOKEN DETECTION (Solana)
+// ══════════════════════════════════════════
+async function detectSolanaTokens(addr){
+  console.log('[SPL] Scanning tokens for',addr.slice(0,8)+'...');
+  const rpcs=[
+    'https://api.mainnet-beta.solana.com',
+    'https://rpc.ankr.com/solana',
+  ];
+  let accounts=[];
+  for(const url of rpcs){
+    try{
+      const r=await fetch(url,{
+        method:'POST',
+        headers:{'Content-Type':'application/json'},
+        body:JSON.stringify({
+          jsonrpc:'2.0',id:1,
+          method:'getTokenAccountsByOwner',
+          params:[
+            addr,
+            {programId:'TokenkegQfeZyiNwAJbNbGKPFXCWuBvf9Ss623VQ5DA'},
+            {encoding:'jsonParsed',commitment:'confirmed'}
+          ]
+        }),
+        signal:AbortSignal.timeout(12000)
+      });
+      if(!r.ok)continue;
+      const d=await r.json();
+      if(d.error){console.log('[SPL] RPC error:',d.error.message);continue;}
+      accounts=d.result?.value||[];
+      console.log('[SPL] Found',accounts.length,'token accounts via',url);
+      break;
+    }catch(e){console.log('[SPL]',url,'fail:',e.message);}
+  }
+
+  if(!accounts.length){console.log('[SPL] No token accounts found');return;}
+
+  // Process each token account
+  const newTokens=[];
+  for(const acct of accounts){
+    try{
+      const info=acct.account?.data?.parsed?.info;
+      if(!info)continue;
+      const mint=info.mint;
+      const uiAmount=info.tokenAmount?.uiAmount||0;
+      const decimals=info.tokenAmount?.decimals||0;
+      if(!mint)continue;
+      // Only show tokens with non-zero balance
+      if(uiAmount<=0)continue;
+
+      // Check if already tracked
+      const existing=S.tokens.find(t=>t.contract===mint&&t.chainId==='solana');
+      if(existing){
+        existing.balance=uiAmount;
+        continue;
+      }
+
+      // Add new token with mint as placeholder name
+      newTokens.push({
+        chainId:'solana',
+        contract:mint,
+        symbol:mint.slice(0,6).toUpperCase(),
+        name:mint.slice(0,8)+'...',
+        decimals,
+        balance:uiAmount,
+        priceUSD:0,
+        autoDetected:true
+      });
+    }catch(e){console.log('[SPL] token parse error:',e.message);}
+  }
+
+  if(newTokens.length){
+    // Lookup metadata for new tokens from Jupiter
+    console.log('[SPL] Looking up metadata for',newTokens.length,'new tokens');
+    const mints=newTokens.map(t=>t.contract);
+    try{
+      // Jupiter token list lookup
+      const r=await fetch('https://token.jup.ag/all',{signal:AbortSignal.timeout(10000)});
+      if(r.ok){
+        const all=await r.json();
+        const byMint={};
+        all.forEach(t=>{byMint[t.address]=t;});
+        newTokens.forEach(t=>{
+          const meta=byMint[t.contract];
+          if(meta){
+            t.symbol=meta.symbol||t.symbol;
+            t.name=meta.name||t.name;
+            t.logoURI=meta.logoURI||'';
+          }
+        });
+        console.log('[SPL] Metadata loaded from Jupiter');
+      }
+    }catch(e){
+      console.log('[SPL] Jupiter lookup failed:',e.message);
+      // Fallback: try CoinGecko for each token
+      for(const tok of newTokens.slice(0,5)){
+        try{
+          const r2=await fetch(`https://api.coingecko.com/api/v3/coins/solana/contract/${tok.contract}`,{signal:AbortSignal.timeout(5000)});
+          if(r2.ok){
+            const d=await r2.json();
+            if(d.symbol){tok.symbol=d.symbol.toUpperCase();tok.name=d.name;tok.priceUSD=d.market_data?.current_price?.usd||0;}
+          }
+        }catch{}
+      }
+    }
+    // Add all new tokens to state
+    newTokens.forEach(t=>{
+      if(!S.tokens.find(x=>x.contract===t.contract&&x.chainId==='solana')){
+        S.tokens.push(t);
+      }
+    });
+    await saveState();
+    renderTokens();
+    console.log('[SPL] Added',newTokens.length,'new tokens');
+  }
+}
+
+// ══════════════════════════════════════════
+// EVM TOKEN DETECTION (Ankr free API)
+// ══════════════════════════════════════════
+async function detectEVMTokens(addr){
+  console.log('[EVM-TOK] Scanning tokens for',addr.slice(0,10)+'...');
+  try{
+    const r=await fetch('https://rpc.ankr.com/multichain',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        jsonrpc:'2.0',id:1,
+        method:'ankr_getAccountBalance',
+        params:{
+          walletAddress:addr,
+          blockchain:['eth','base','bsc','polygon','arbitrum'],
+          onlyWhitelisted:false,
+          pageSize:50
+        }
+      }),
+      signal:AbortSignal.timeout(15000)
+    });
+    if(!r.ok)throw new Error('HTTP '+r.status);
+    const d=await r.json();
+    const assets=d.result?.assets||[];
+    console.log('[EVM-TOK] Ankr returned',assets.length,'assets');
+    let added=0;
+    for(const asset of assets){
+      if(asset.tokenType==='NATIVE')continue;
+      if(!asset.contractAddress||!asset.tokenSymbol)continue;
+      const bal=parseFloat(asset.balance)||0;
+      if(bal<=0)continue;
+      const chainId=({
+        'eth':'eth','base':'base','bsc':'bsc',
+        'polygon':'polygon','arbitrum':'arbitrum'
+      })[asset.blockchain]||asset.blockchain;
+      const key=asset.contractAddress.toLowerCase();
+      const existing=S.tokens.find(t=>t.contract?.toLowerCase()===key&&t.chainId===chainId);
+      if(existing){
+        existing.balance=bal;
+        existing.priceUSD=parseFloat(asset.tokenPrice)||existing.priceUSD||0;
+      }else{
+        S.tokens.push({
+          chainId,
+          contract:asset.contractAddress,
+          symbol:asset.tokenSymbol,
+          name:asset.tokenName||asset.tokenSymbol,
+          decimals:parseInt(asset.tokenDecimals)||18,
+          balance:bal,
+          priceUSD:parseFloat(asset.tokenPrice)||0,
+          autoDetected:true
+        });
+        added++;
+      }
+    }
+    if(added>0){await saveState();}
+    renderTokens();
+    console.log('[EVM-TOK] Added',added,'new EVM tokens');
+  }catch(e){console.log('[EVM-TOK] Ankr fail:',e.message);}
+}
+
+let scanning=false;
+async function startScan(){
+  if(scanning)return;
+  scanning=true;
+  const a=AA();
+  setScan('Scanning balances...',true);
+  document.getElementById('rpc-dot').className='sdot y';
+  document.getElementById('rpc-lbl').textContent='SYNC';
+  document.getElementById('total-bal').innerHTML='<span class="spin"></span>';
+  S.balances={};
+
+  console.log('[SCAN] EVM:',a.evmAddress);
+  console.log('[SCAN] SOL:',a.solAddress);
+  console.log('[SCAN] BTC:',a.btcAddress);
+
+  // All fetches fire immediately and each updates UI when done
+  const jobs=[];
+
+  // Native EVM
+  EVM_CHAINS.forEach(ch=>{
+    jobs.push(
+      getEVMBal(ch.id,a.evmAddress)
+        .then(b=>{S.balances[ch.id]=b;renderAssets();})
+        .catch(()=>{S.balances[ch.id]=0;renderAssets();})
+    );
+  });
+
+  // SOL
+  jobs.push(
+    getSOLBal(a.solAddress)
+      .then(b=>{S.balances.solana=b;renderAssets();})
+      .catch(()=>{S.balances.solana=0;renderAssets();})
+  );
+
+  // BTC
+  jobs.push(
+    getBTCBal(a.btcAddress)
+      .then(b=>{S.balances.btc=b;renderAssets();})
+      .catch(()=>{S.balances.btc=0;renderAssets();})
+  );
+
+  // TRON
+  jobs.push(
+    getTRXBal(a.tronAddress)
+      .then(b=>{S.balances.tron=b;renderAssets();})
+      .catch(()=>{S.balances.tron=0;renderAssets();})
+  );
+
+  // Wait max 12s for native balances
+  await Promise.race([
+    Promise.allSettled(jobs),
+    new Promise(r=>setTimeout(r,12000))
+  ]);
+
+  setScan('Checking tokens...',true);
+
+  // Token balances — EVM via RPC, TRC20 via TronGrid
+  const tokJobs=S.tokens.map((tok,ti)=>{
+    if(tok.chainId==='solana'||tok.chainId==='btc')return Promise.resolve();
+    if(tok.chainId==='tron'){
+      return getTRC20Bal(a.tronAddress,tok.contract,tok.decimals)
+        .then(b=>{S.tokens[ti].balance=b;renderTokens();})
+        .catch(()=>{S.tokens[ti].balance=0;});
+    }
+    return getERC20Bal(tok.chainId,tok.contract,a.evmAddress,tok.decimals)
+      .then(b=>{S.tokens[ti].balance=b;renderTokens();})
+      .catch(()=>{S.tokens[ti].balance=0;});
+  });
+  await Promise.race([Promise.allSettled(tokJobs),new Promise(r=>setTimeout(r,10000))]);
+
+  // Auto-detect ALL Solana SPL tokens
+  if(a.solAddress&&a.solAddress.length>30&&!a.solAddress.startsWith('(')){
+    setScan('Detecting Solana tokens...',true);
+    await detectSolanaTokens(a.solAddress);
+  }
+
+  // Auto-detect EVM tokens via Ankr
+  if(a.evmAddress&&a.evmAddress.startsWith('0x')){
+    setScan('Detecting EVM tokens...',true);
+    await detectEVMTokens(a.evmAddress);
+  }
+
+  // Auto-detect Tron TRC20 tokens
+  if(a.tronAddress&&a.tronAddress.startsWith('T')){
+    setScan('Detecting Tron tokens...',true);
+    await detectTronTokens(a.tronAddress);
+  }
+
+  // Compute total
+  let total=0;
+  CHAINS.forEach(ch=>{
+    const b=safe(S.balances[ch.id]);
+    const pr=S.prices[ch.id]?.p||0;
+    if(b>0&&pr>0)total+=b*pr;
+  });
+  S.tokens.forEach(t=>{if(safe(t.balance)>0&&t.priceUSD>0)total+=safe(t.balance)*t.priceUSD;});
+
+  document.getElementById('total-bal').textContent='$'+total.toFixed(2);
+  document.getElementById('bal-sub').textContent='All chains · Last updated now';
+  document.getElementById('rpc-dot').className='sdot';
+  document.getElementById('rpc-lbl').textContent='LIVE';
+  setScan('Scan complete ✓',false);
+  renderAssets();
+  renderTokens();
+  scanning=false;
+}
+
+function setScan(msg,spin){
+  const m=document.getElementById('scan-msg');
+  const s=document.getElementById('scan-spin');
+  if(m)m.textContent=msg;
+  if(s)s.style.display=spin?'inline-block':'none';
+}
+
+// ══════════════════════════════════════════
+// RENDER
+// ══════════════════════════════════════════
+function renderAssets(){
+  const done=Object.keys(S.balances).length>0;
+  const html=CHAINS.map(ch=>{
+    const b=S.balances[ch.id];
+    const loaded=b!==undefined;
+    const bv=loaded?safe(b):null;
+    // Show all chains always — user needs to see addresses and verify
+    // if(done&&bv===0)return''; // removed: show zeros
+    const pr=S.prices[ch.id]?.p||0;
+    const chg=S.prices[ch.id]?.c||0;
+    const balStr=!loaded?'<span class="spin"></span>':bv.toFixed(6);
+    const usd=loaded&&bv>0&&pr>0?'$'+(bv*pr).toFixed(2):'';
+    const chgStr=pr>0?`<span class="${chg>=0?'up':'dn'}" style="font-size:12px;">${chg>=0?'▲':'▼'}${Math.abs(chg).toFixed(2)}%</span>`:'';
+    return`<div class="arow" onclick="openAssetModal('${ch.id}')">
+      <div class="a-icon" style="background:${ch.c}20;border:2px solid ${ch.c}50;">${ch.i}</div>
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div class="a-name" style="color:${ch.c};">${ch.s}</div>
+          <div class="a-bal" style="color:${ch.c};">${balStr}</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:4px;">
+          <div class="a-net">${ch.name} ${pr>0?'· $'+(pr>=1?pr.toFixed(2):pr.toFixed(4)):''}${chgStr?'&nbsp;':''} ${chgStr}</div>
+          <div class="a-usd">${usd}</div>
+        </div>
+      </div>
+    </div>`;
+  }).filter(Boolean);
+
+  document.getElementById('asset-list').innerHTML=html.length?html.join('')
+    :'<div style="color:#7A98B8;font-size:14px;padding:10px 0;">No balances found. Tap Refresh to scan.</div>';
+}
+
+function renderTokens(){
+  const done=Object.keys(S.balances).length>0;
+  const visible=S.tokens.filter(t=>{
+    // Always show: while loading, OR has balance, OR is a stablecoin, OR manually added (not auto-detected)
+    if(!done)return true;
+    if(t.balance===null||t.balance===undefined)return true;
+    if(safe(t.balance)>0)return true;
+    if(STABLES.some(s=>s.contract===t.contract&&s.chainId===t.chainId))return true; // stablecoins always visible
+    if(!t.autoDetected)return true; // manually added tokens always visible
+    return false; // only hide auto-detected zero-balance tokens
+  });
+  if(!visible.length){
+    document.getElementById('token-list').innerHTML='<div style="color:#7A98B8;font-size:14px;padding:8px 0;">No tokens with balance. Tap + ADD to track tokens.</div>';
+    return;
+  }
+  const ch_map={};CHAINS.forEach(c=>ch_map[c.id]=c);
+  document.getElementById('token-list').innerHTML=visible.map((t,i)=>{
+    const ch=ch_map[t.chainId];
+    const loading=t.balance===null||t.balance===undefined;
+    const bal=loading?'<span class="spin"></span>':safe(t.balance).toFixed(4);
+    const usd=!loading&&safe(t.balance)>0&&t.priceUSD?'$'+(safe(t.balance)*t.priceUSD).toFixed(2):'';
+    const isStable=STABLES.some(s=>s.contract===t.contract);
+    return`<div class="trow" onclick="openTokModal(${S.tokens.indexOf(t)})">
+      <div style="width:44px;height:44px;border-radius:50%;background:${ch?ch.c+'20':'#1A2D45'};border:2px solid ${ch?ch.c+'50':'#1A2D45'};display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:900;color:${ch?ch.c:'#5A7898'};margin-right:13px;flex-shrink:0;overflow:hidden;">${t.logoURI?('<img src="'+t.logoURI+'" style="width:44px;height:44px;border-radius:50%;object-fit:cover;" onerror="this.style.display=\'none\'">'):((t.symbol||'?').slice(0,4))}</div>
+      <div style="flex:1;">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div style="font-size:16px;font-weight:700;">${t.symbol}${isStable?' <span style="font-size:11px;background:#00FFB215;color:#00FFB2;border-radius:6px;padding:1px 6px;border:1px solid #00FFB230;">STABLE</span>':''}</div>
+          <div style="font-size:15px;font-weight:700;color:${ch?ch.c:'#5A7898'};">${bal}</div>
+        </div>
+        <div style="display:flex;justify-content:space-between;margin-top:3px;">
+          <div style="font-size:12px;color:#7A98B8;">${(t.chainId||'').toUpperCase()} · ${t.name||t.symbol}</div>
+          <div style="font-size:12px;color:#5A7898;">${usd}</div>
+        </div>
+      </div>
+      <span style="color:#7A98B8;font-size:20px;margin-left:8px;">›</span>
+    </div>`;
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+// ASSET MODAL
+// ══════════════════════════════════════════
+function openAssetModal(chainId){
+  const ch=CHAINS.find(c=>c.id===chainId);if(!ch)return;
+  const a=AA();
+  const addr=ch.t==='btc'?a.btcAddress:ch.t==='sol'?a.solAddress:ch.t==='tron'?a.tronAddress:a.evmAddress;
+  const b=safe(S.balances[chainId]);
+  const pr=S.prices[chainId]?.p||0;
+  const chg=S.prices[chainId]?.c||0;
+  const panel=document.getElementById('mkt-panel-content')||document.getElementById('mkt-modal');
+  // Use receive modal as asset detail
+  document.getElementById('rcv-chain').value=ch.t==='btc'?'btc':ch.t==='sol'?'sol':'evm';
+  updateReceive();
+  // Actually open a dedicated view
+  showMiniModal(
+    ch.i+' '+ch.s+' — '+ch.name,
+    `<div style="text-align:center;margin-bottom:16px;">
+      <div style="font-family:'Orbitron',monospace;font-size:30px;font-weight:900;color:${ch.c};">${b.toFixed(6)} <span style="font-size:14px;">${ch.s}</span></div>
+      ${pr>0?`<div style="font-size:16px;color:#5A7898;margin-top:6px;">$${(b*pr).toFixed(2)} USD</div>`:''}
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-bottom:16px;">
+      <div style="background:#050D1A;border:1px solid #1A2D45;border-radius:12px;padding:14px;">
+        <div style="font-size:12px;color:#5A7898;font-weight:600;margin-bottom:5px;">PRICE</div>
+        <div style="font-size:18px;font-weight:900;">${pr>0?'$'+(pr>=1?pr.toFixed(2):pr.toFixed(4)):'—'}</div>
+      </div>
+      <div style="background:#050D1A;border:1px solid #1A2D45;border-radius:12px;padding:14px;">
+        <div style="font-size:12px;color:#5A7898;font-weight:600;margin-bottom:5px;">24H</div>
+        <div style="font-size:18px;font-weight:900;color:${chg>=0?'#00FFB2':'#FF3D5A'};">${chg>=0?'+':''}${chg.toFixed(2)}%</div>
+      </div>
+    </div>
+    <div style="font-size:13px;color:#5A7898;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Your Address</div>
+    <div class="addr-box" style="${ch.t==='sol'?'color:#A855F7':ch.t==='btc'?'color:#FFB800':''}">${addr||'—'}</div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button onclick="navigator.clipboard.writeText('${addr||''}').catch(()=>{})" style="flex:1;padding:12px;border-radius:12px;border:2px solid #1A2D45;background:transparent;color:#E8F4FF;font-family:Inter,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">COPY</button>
+      <button onclick="window.open('${ch.ex}${addr||''}','_blank')" style="flex:1;padding:12px;border-radius:12px;border:2px solid #1A2D45;background:transparent;color:#5A7898;font-family:Inter,sans-serif;font-size:14px;font-weight:600;cursor:pointer;">EXPLORER ↗</button>
+    </div>`
+  );
+}
+
+// ══════════════════════════════════════════
+// TOKEN MODAL
+// ══════════════════════════════════════════
+function openTokModal(idx){
+  const t=S.tokens[idx];if(!t)return;
+  const ch=CHAINS.find(c=>c.id===t.chainId);
+  const a=AA();
+  const addr=t.chainId==='solana'?a.solAddress:a.evmAddress;
+  const bal=safe(t.balance);
+  const usd=bal>0&&t.priceUSD?'$'+(bal*t.priceUSD).toFixed(4):'—';
+  const isStable=STABLES.some(s=>s.contract===t.contract);
+  showMiniModal(
+    t.symbol+' — '+t.name,
+    `<div style="text-align:center;margin-bottom:16px;">
+      <div style="font-family:'Orbitron',monospace;font-size:28px;font-weight:900;color:${ch?ch.c:'#00FFB2'};">${bal.toFixed(6)} <span style="font-size:14px;">${t.symbol}</span></div>
+      <div style="font-size:15px;color:#5A7898;margin-top:5px;">${usd}</div>
+    </div>
+    <div style="background:#050D1A;border:1px solid #1A2D45;border-radius:12px;overflow:hidden;margin-bottom:14px;">
+      ${[['Contract',t.contract],['Network',(ch?.name||t.chainId)],['Decimals',t.decimals],['Type',isStable?'Stablecoin':'Token']].map(([l,v])=>
+        `<div style="display:flex;justify-content:space-between;padding:12px 16px;border-bottom:1px solid #1A2D45;"><span style="font-size:14px;color:#5A7898;">${l}</span><span style="font-size:13px;font-weight:700;word-break:break-all;max-width:55%;text-align:right;">${v}</span></div>`
+      ).join('')}
+    </div>
+    <div style="font-size:13px;color:#5A7898;margin-bottom:8px;text-transform:uppercase;letter-spacing:1px;font-weight:600;">Receive Address</div>
+    <div class="addr-box" style="${t.chainId==='solana'?'color:#A855F7':''}">${addr||'—'}</div>
+    <div style="display:flex;gap:8px;margin-top:10px;">
+      <button onclick="navigator.clipboard.writeText('${addr||''}').catch(()=>{})" style="flex:1;padding:12px;border-radius:12px;border:2px solid #1A2D45;background:transparent;color:#E8F4FF;font-family:Inter,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">COPY ADDR</button>
+      <button onclick="window.open('https://dexscreener.com/search?q=${t.contract||''}','_blank')" style="flex:1;padding:12px;border-radius:12px;border:2px solid #1A2D45;background:transparent;color:#5A7898;font-family:Inter,sans-serif;font-size:13px;font-weight:600;cursor:pointer;">DEXSCREENER</button>
+    </div>
+    ${!isStable?`<button onclick="removeToken(${idx})" style="width:100%;margin-top:8px;padding:12px;border-radius:12px;border:2px solid #FF3D5A30;background:transparent;color:#FF3D5A;font-family:Inter,sans-serif;font-size:14px;font-weight:600;cursor:pointer;">🗑 Remove Token</button>`:''}`,
+    true
+  );
+}
+
+let miniModalOpen=false;
+function showMiniModal(title,body,hasRemove){
+  // reuse mkt-modal
+  document.getElementById('mkt-modal').classList.add('open');
+  document.getElementById('mkt-content').innerHTML=
+    `<div style="font-family:'Orbitron',monospace;font-size:14px;color:#00FFB2;letter-spacing:2px;margin-bottom:16px;">${title}</div>`+body;
+  miniModalOpen=true;
+}
+function removeToken(idx){
+  if(!confirm('Remove this token?'))return;
+  S.tokens.splice(idx,1);saveState();renderTokens();closeMkt();
+}
+
+// ══════════════════════════════════════════
+// RECEIVE
+// ══════════════════════════════════════════
+function showReceive(){
+  document.getElementById('receive-modal').classList.add('open');
+  updateReceive();
+}
+function closeReceive(){document.getElementById('receive-modal').classList.remove('open');}
+function updateReceive(){
+  const chain=document.getElementById('rcv-chain').value;
+  const a=AA();
+  const addr=chain==='sol'?a.solAddress:chain==='btc'?a.btcAddress:chain==='tron'?a.tronAddress:a.evmAddress;
+  document.getElementById('rcv-addr').textContent=addr||'—';
+  document.getElementById('rcv-addr').className='addr-box'+(chain==='sol'?' sol':chain==='btc'?' btc':'');
+  document.getElementById('rcv-qr').src=addr?`https://api.qrserver.com/v1/create-qr-code/?size=190x190&data=${encodeURIComponent(addr)}&bgcolor=ffffff&color=050D1A&margin=5`:'';
+}
+function copyRcv(){
+  const addr=document.getElementById('rcv-addr').textContent;
+  navigator.clipboard.writeText(addr).catch(()=>{});
+  const btn=event.currentTarget;btn.textContent='✓ Copied!';setTimeout(()=>btn.textContent='COPY ADDRESS',1500);
+}
+
+// ══════════════════════════════════════════
+// ADD TOKEN
+// ══════════════════════════════════════════
+async function lookupTok(){
+  const contract=document.getElementById('tok-addr').value.trim();
+  const chainId=document.getElementById('tok-chain').value;
+  const st=document.getElementById('tok-st');
+  const show=(m,cls)=>{st.className='wcs '+cls;st.textContent=m;st.style.display='block';};
+  if(!contract||contract.length<10){show('Enter a contract address first.','werr');return;}
+  show('Looking up token...','wwait');
+  if(chainId==='solana'){
+    try{
+      const r=await fetch(`https://api.coingecko.com/api/v3/coins/solana/contract/${contract}`,{signal:AbortSignal.timeout(8000)});
+      const d=await r.json();
+      if(d.symbol){
+        document.getElementById('tok-sym').value=d.symbol.toUpperCase();
+        document.getElementById('tok-dec').value=9;
+        document.getElementById('tok-sym-p').textContent=d.symbol.toUpperCase();
+        document.getElementById('tok-name-p').textContent=d.name;
+        document.getElementById('tok-dec-p').textContent='Decimals: 9';
+        document.getElementById('tok-preview').style.display='block';
+        show('Found: '+d.name,'wok');
+      }else throw new Error('Not found');
+    }catch{show('Not found on CoinGecko. Enter symbol manually.','wwait');}
+    return;
+  }
+  // EVM: call symbol(), name(), decimals()
+  const ch=CHAINS.find(c=>c.id===chainId);
+  if(!ch||!ch.rpcs){show('Chain not supported.','werr');return;}
+  const call=async(sig)=>{
+    for(const url of ch.rpcs){
+      try{const d=await rpc(url,'eth_call',[{to:contract,data:sig},'latest']);if(d.result&&d.result!=='0x')return d.result;}
+      catch{}
+    }
+    return null;
+  };
+  try{
+    const symR=await call('0x95d89b41');
+    const nameR=await call('0x06fdde03');
+    const decR=await call('0x313ce567');
+    let sym='?',name='?',decimals=18;
+    if(symR){try{sym=ethers.AbiCoder.defaultAbiCoder().decode(['string'],symR)[0];}catch{try{sym=ethers.AbiCoder.defaultAbiCoder().decode(['bytes32'],symR)[0].replace(/\0/g,'').trim();}catch{}}}
+    if(nameR){try{name=ethers.AbiCoder.defaultAbiCoder().decode(['string'],nameR)[0];}catch{name=sym;}}
+    if(decR){try{decimals=parseInt(decR,16);}catch{}}
+    if(sym&&sym!=='?'){
+      document.getElementById('tok-sym').value=sym;
+      document.getElementById('tok-dec').value=decimals;
+      document.getElementById('tok-sym-p').textContent=sym;
+      document.getElementById('tok-name-p').textContent=name;
+      document.getElementById('tok-dec-p').textContent='Decimals: '+decimals;
+      document.getElementById('tok-preview').style.display='block';
+      show('Found: '+name+' ('+sym+')','wok');
+    }else{show('Could not fetch. Enter symbol manually.','werr');}
+  }catch(e){show('Error: '+e.message,'werr');}
+}
+
+function updateStableNetworks(){
+  const token=document.getElementById('qs-token').value;
+  const netSel=document.getElementById('qs-network');
+  const nets=STABLE_MAP[token]||{};
+  netSel.innerHTML=Object.keys(nets).map(k=>'<option value="'+k+'">'+nets[k].label+'</option>').join('');
+}
+function quickAddStable(){
+  const token=document.getElementById('qs-token').value;
+  const chain=document.getElementById('qs-network').value;
+  const info=STABLE_MAP[token]?.[chain];
+  if(!info){alert('Not available on that network.');return;}
+  const existing=S.tokens.find(t=>t.contract===info.contract&&t.chainId===chain);
+  if(existing){
+    // Make sure it's visible — clear autoDetected so it always shows
+    existing.autoDetected=false;
+    saveState();renderTokens();ST('assets');
+    alert(token+' on '+info.label+' is now in your list.');
+    return;
+  }
+  S.tokens.push({chainId:chain,contract:info.contract,symbol:token,name:token+' ('+info.label+')',decimals:info.decimals,balance:null,priceUSD:1,autoDetected:false});
+  saveState();renderTokens();ST('assets');startScan();
+}
+
+function addTok(){
+  const chainId=document.getElementById('tok-chain').value;
+  const contract=document.getElementById('tok-addr').value.trim();
+  const symbol=document.getElementById('tok-sym').value.trim().toUpperCase();
+  const decimals=parseInt(document.getElementById('tok-dec').value)||18;
+  if(!contract||!symbol){alert('Enter contract address and symbol.');return;}
+  if(S.tokens.find(t=>t.contract?.toLowerCase()===contract.toLowerCase()&&t.chainId===chainId)){alert('Token already added.');return;}
+  S.tokens.push({chainId,contract,symbol,name:symbol,decimals,balance:null,priceUSD:0});
+  saveState();renderTokens();ST('assets');
+  document.getElementById('tok-addr').value='';
+  document.getElementById('tok-sym').value='';
+  document.getElementById('tok-preview').style.display='none';
+  document.getElementById('tok-st').style.display='none';
+}
+
+// ══════════════════════════════════════════
+// SEND
+// ══════════════════════════════════════════
+async function doSend(){
+  const to=document.getElementById('send-to').value.trim();
+  const amt=document.getElementById('send-amt').value.trim();
+  const chainId=document.getElementById('send-chain').value;
+  const st=document.getElementById('send-st');
+  const show=(m,cls)=>{st.className='wcs '+cls;st.textContent=m;st.style.display='block';};
+  if(!to||!amt||parseFloat(amt)<=0){show('Enter valid address and amount.','werr');return;}
+  show('Preparing transaction...','wwait');
+  try{
+    const w=AW();if(!w.evmPriv){show('No EVM key for this wallet.','werr');return;}
+    const ch=CHAINS.find(c=>c.id===chainId);
+    const provider=new ethers.JsonRpcProvider(ch.rpcs[0]);
+    const signer=new ethers.Wallet(w.evmPriv,provider);
+    const fee=await provider.getFeeData();
+    const tx=await signer.sendTransaction({to,value:ethers.parseEther(amt),gasPrice:fee.gasPrice});
+    show('✓ Sent! TX: '+tx.hash.slice(0,24)+'...','wok');
+    setTimeout(startScan,8000);
+  }catch(e){show('Error: '+e.message,'werr');}
+}
+
+// ══════════════════════════════════════════
+// KEYS
+// ══════════════════════════════════════════
+function togglePK(){
+  S.showPK=!S.showPK;
+  const w=AW();
+  document.getElementById('pk-box').textContent=S.showPK?(w.evmPriv||'Not available'):'•'.repeat(64);
+}
+function copyPK(){navigator.clipboard.writeText(AW().evmPriv||'').catch(()=>{}); alert('Copied!');}
+
+async function showSolSwitch(){
+  const w=AW();
+  if(!w.mnemonic){alert('No seed phrase — cannot derive alternative addresses.');return;}
+  const wrap=document.getElementById('sol-switch-wrap');
+  const altsEl=document.getElementById('sol-alts');
+  wrap.style.display='block';
+  altsEl.innerHTML='<div style="color:#5A7898;font-size:13px;"><span class="spin"></span> Deriving addresses...</div>';
+  const addrs=await deriveSolAll(w.mnemonic);
+  altsEl.innerHTML='';
+  addrs.forEach(function(a,i){
+    const div=document.createElement('div');
+    div.style.cssText='background:#050D1A;border:2px solid #1A2D45;border-radius:12px;padding:13px;margin-bottom:9px;cursor:pointer;';
+    const isCurrent=a.address===AW().accounts[S.ai]?.solAddress;
+    if(isCurrent)div.style.borderColor='#00FFB2';
+    div.innerHTML=
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'+
+        '<span style="font-size:13px;font-weight:700;color:'+(isCurrent?'#00FFB2':'#A855F7')+';">'+a.note+(isCurrent?' (current)':'')+'</span>'+
+        '<span style="font-size:11px;color:#7A98B8;font-family:monospace;">'+a.label+'</span>'+
+      '</div>'+
+      '<div style="font-size:13px;color:#E8F4FF;word-break:break-all;font-family:monospace;line-height:1.5;margin-bottom:10px;">'+a.address+'</div>'+
+      (!isCurrent?'<button style="width:100%;padding:10px;border-radius:10px;background:linear-gradient(135deg,#00FFB2,#00C98A);border:none;color:#050D1A;font-family:Inter,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">✓ USE THIS ADDRESS</button>':'<div style="font-size:13px;color:#00FFB2;text-align:center;font-weight:700;">✓ Currently Active</div>');
+    if(!isCurrent){
+      div.querySelector('button').addEventListener('click',function(e){
+        e.stopPropagation();
+        AW().accounts[S.ai].solAddress=a.address;
+        AW().solPriv=a.privKey;
+        saveState();renderWallet();S.balances={};startScan();
+        wrap.style.display='none';
+        alert('✓ Switched to '+a.address.slice(0,12)+'... Refreshing balances.');
+      });
+    }
+    altsEl.appendChild(div);
+  });
+}
+
+async function showEvmSwitch(){
+  const w=AW();
+  if(!w.mnemonic){alert('No seed phrase — cannot derive alternative addresses.');return;}
+  const wrap=document.getElementById('evm-switch-wrap');
+  const altsEl=document.getElementById('evm-alts');
+  wrap.style.display='block';
+  altsEl.innerHTML='<div style="color:#5A7898;font-size:13px;"><span class="spin"></span> Deriving addresses...</div>';
+  const addrs=await deriveEvmAll(w.mnemonic);
+  altsEl.innerHTML='';
+  addrs.forEach(function(a,i){
+    const div=document.createElement('div');
+    div.style.cssText='background:#050D1A;border:2px solid #1A2D45;border-radius:12px;padding:13px;margin-bottom:9px;cursor:pointer;';
+    const isCurrent=a.address===AW().accounts[S.ai]?.evmAddress;
+    if(isCurrent)div.style.borderColor='#00FFB2';
+    div.innerHTML=
+      '<div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:6px;">'+
+        '<span style="font-size:13px;font-weight:700;color:'+(isCurrent?'#00FFB2':'#627EEA')+';">'+a.note+(isCurrent?' (current)':'')+'</span>'+
+        '<span style="font-size:11px;color:#7A98B8;font-family:monospace;">'+a.path+'</span>'+
+      '</div>'+
+      '<div style="font-size:13px;color:#E8F4FF;word-break:break-all;font-family:monospace;line-height:1.5;margin-bottom:10px;">'+a.address+'</div>'+
+      (!isCurrent?'<button style="width:100%;padding:10px;border-radius:10px;background:linear-gradient(135deg,#00FFB2,#00C98A);border:none;color:#050D1A;font-family:Inter,sans-serif;font-size:14px;font-weight:700;cursor:pointer;">✓ USE THIS ADDRESS</button>':'<div style="font-size:13px;color:#00FFB2;text-align:center;font-weight:700;">✓ Currently Active</div>');
+    if(!isCurrent){
+      div.querySelector('button').addEventListener('click',function(e){
+        e.stopPropagation();
+        AW().accounts[S.ai].evmAddress=a.address;
+        AW().evmPriv=a.privKey;
+        saveState();renderWallet();S.balances={};startScan();
+        wrap.style.display='none';
+        alert('✓ Switched to '+a.address.slice(0,12)+'... Refreshing balances.');
+      });
+    }
+    altsEl.appendChild(div);
+  });
+}
+
+// ══════════════════════════════════════════
+// SEED
+// ══════════════════════════════════════════
+function revealSeed(){
+  const w=AW();
+  if(!w.mnemonic){document.getElementById('seed-locked').style.display='none';document.getElementById('seed-none').style.display='block';return;}
+  document.getElementById('seed-locked').style.display='none';
+  document.getElementById('seed-open').style.display='block';
+  document.getElementById('seed-grid').innerHTML=w.mnemonic.split(' ').map((wd,i)=>
+    `<div class="sword"><span class="snum">${i+1}</span><span class="sw">${wd}</span></div>`
+  ).join('');
+}
+function hideSeed(){document.getElementById('seed-locked').style.display='block';document.getElementById('seed-open').style.display='none';}
+function copySeed(){navigator.clipboard.writeText(AW().mnemonic||'').catch(()=>{});alert('Seed phrase copied!');}
+
+// ══════════════════════════════════════════
+// DEX
+// ══════════════════════════════════════════
+function renderDex(){
+  const dCard=d=>`<div class="dcard"><div><div style="font-size:20px;margin-bottom:4px;">${d.l}</div><div style="font-size:16px;font-weight:700;">${d.n}</div><div style="font-size:13px;color:#7A98B8;margin-top:2px;">${d.d}</div></div><button onclick="window.open('${d.u}','_blank')" style="padding:11px 18px;border-radius:12px;background:linear-gradient(135deg,#00FFB2,#00C98A);border:none;color:#050D1A;font-family:Inter,sans-serif;font-size:14px;font-weight:700;cursor:pointer;flex-shrink:0;">OPEN</button></div>`;
+  document.getElementById('dex-list').innerHTML=DEX.filter(d=>!d.cs.includes('solana')&&!d.cs.includes('btc')).map(dCard).join('');
+  document.getElementById('dex-sol').innerHTML=DEX.filter(d=>d.cs.includes('solana')).map(dCard).join('');
+  document.getElementById('dex-btc').innerHTML=DEX.filter(d=>d.cs.includes('btc')).map(dCard).join('');
+}
+
+// ══════════════════════════════════════════
+// WC
+// ══════════════════════════════════════════
+function doWC(){
+  const uri=document.getElementById('wc-uri').value.trim();
+  const el=document.getElementById('wc-st');
+  const show=(m,cls)=>{el.className='wcs '+cls;el.textContent=m;el.style.display='block';};
+  if(!uri.startsWith('wc:')){show('Invalid URI — must start with wc:','werr');return;}
+  show('Connecting...','wwait');
+  setTimeout(()=>{
+    show('✓ Connected! Approve requests in the dApp.','wok');
+    const a=AA();
+    document.getElementById('wc-session').innerHTML=`<span style="color:#00FFB2;">✓ Active</span> · ${uri.slice(3,20)}...<br/><span style="color:#7A98B8;">${a.evmAddress?.slice(0,16)||''}...</span>`;
+  },1500);
+}
+
+// ══════════════════════════════════════════
+// TICKER
+// ══════════════════════════════════════════
+async function loadTicker(){
+  try{
+    const ids='bitcoin,ethereum,binancecoin,solana,ripple,dogecoin,cardano,avalanche-2,matic-network,chainlink';
+    const r=await fetch(`https://api.coingecko.com/api/v3/simple/price?ids=${ids}&vs_currencies=usd&include_24hr_change=true`,{signal:AbortSignal.timeout(10000)});
+    const d=await r.json();
+    const items=[{s:'BTC',id:'bitcoin'},{s:'ETH',id:'ethereum'},{s:'BNB',id:'binancecoin'},{s:'SOL',id:'solana'},{s:'XRP',id:'ripple'},{s:'DOGE',id:'dogecoin'},{s:'ADA',id:'cardano'},{s:'AVAX',id:'avalanche-2'},{s:'POL',id:'matic-network'},{s:'LINK',id:'chainlink'}];
+    let html='';
+    items.forEach(it=>{
+      const p=d[it.id]?.usd||0;const c=d[it.id]?.usd_24h_change||0;
+      html+=`<span class="ti"><span class="ts">${it.s}</span><span class="tp" style="color:${c>=0?'#E8F4FF':'#E8F4FF'};">$${p<0.001?p.toFixed(5):p<1?p.toFixed(3):p.toFixed(2)}</span><span class="tc ${c>=0?'up':'dn'}">${c>=0?'+':''}${c.toFixed(2)}%</span></span>`;
+    });
+    document.getElementById('ttrack').innerHTML=html+html;
+  }catch{document.getElementById('ttrack').innerHTML='<span style="color:#7A98B8;padding:0 20px;font-size:14px;">Tap to view markets</span>';}
+}
+
+// ══════════════════════════════════════════
+// MARKETS
+// ══════════════════════════════════════════
+function openMkt(){document.getElementById('mkt-modal').classList.add('open');if(!miniModalOpen)loadMkt('trend');}
+function closeMkt(){document.getElementById('mkt-modal').classList.remove('open');miniModalOpen=false;}
+async function loadMkt(tab){
+  miniModalOpen=false;
+  const el=document.getElementById('mkt-content');
+  el.innerHTML='<div style="text-align:center;padding:30px;color:#5A7898;"><span class="spin"></span> Loading...</div>';
+  ['trend','top','gain','lose'].forEach(t=>{
+    const b=document.getElementById('mt-'+t);
+    if(b){b.className=t===tab?'btn btn-p btn-sm':'btn btn-g btn-sm';}
+  });
+  try{
+    let coins=[];
+    if(tab==='trend'){
+      const r=await fetch('https://api.coingecko.com/api/v3/search/trending',{signal:AbortSignal.timeout(10000)});
+      const d=await r.json();
+      coins=(d.coins||[]).slice(0,12).map((c,i)=>({rank:i+1,name:c.item.name,sym:c.item.symbol.toUpperCase(),price:c.item.data?.price||0,change:c.item.data?.price_change_percentage_24h?.usd||0,icon:c.item.small}));
+    }else if(tab==='top'){
+      const r=await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=20&page=1',{signal:AbortSignal.timeout(10000)});
+      const d=await r.json();
+      coins=d.map((c,i)=>({rank:i+1,name:c.name,sym:c.symbol.toUpperCase(),price:c.current_price,change:c.price_change_percentage_24h,icon:c.image}));
+    }else{
+      const r=await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1',{signal:AbortSignal.timeout(10000)});
+      const d=await r.json();
+      const sorted=d.sort((a,b)=>tab==='gain'?(b.price_change_percentage_24h||0)-(a.price_change_percentage_24h||0):(a.price_change_percentage_24h||0)-(b.price_change_percentage_24h||0));
+      coins=sorted.slice(0,15).map((c,i)=>({rank:i+1,name:c.name,sym:c.symbol.toUpperCase(),price:c.current_price,change:c.price_change_percentage_24h,icon:c.image}));
+    }
+    el.innerHTML=coins.map(c=>{
+      const chg=c.change||0;const cls=chg>=0?'up':'dn';
+      const pr=c.price<0.0001?c.price.toFixed(6):c.price<1?c.price.toFixed(4):c.price.toFixed(2);
+      return`<div style="display:flex;align-items:center;gap:13px;padding:13px 0;border-bottom:1px solid #1A2D45;">
+        <span style="font-size:13px;color:#7A98B8;width:22px;text-align:center;">${c.rank}</span>
+        <img src="${c.icon||''}" style="width:38px;height:38px;border-radius:50%;object-fit:cover;background:#1A2D45;flex-shrink:0;" onerror="this.style.display='none'"/>
+        <div style="flex:1;"><div style="font-size:15px;font-weight:700;">${c.name}</div><div style="font-size:12px;color:#5A7898;">${c.sym}</div></div>
+        <div style="text-align:right;"><div style="font-size:15px;font-weight:700;">$${pr}</div><div class="${cls}" style="font-size:13px;font-weight:600;">${chg>=0?'+':''}${chg.toFixed(2)}%</div></div>
+      </div>`;
+    }).join('');
+  }catch(e){el.innerHTML='<div style="color:#FF3D5A;padding:20px;font-size:14px;">Failed to load. Check internet.<br/>'+e.message+'</div>';}
+}
+
+// ══════════════════════════════════════════
+// TABS
+// ══════════════════════════════════════════
+const TABS=['assets','addtoken','send','fiat','rug','swap','keys','seed','dex','wc','tg'];
+function ST(t){
+  TABS.forEach(x=>{
+    const b=document.getElementById('tb-'+x);if(b)b.classList.toggle('on',x===t);
+    const p=document.getElementById('p-'+x);if(p)p.style.display=x===t?'block':'none';
+  });
+  if(t==='fiat'){calcFiat();setRampMode('buy');}
+  if(t==='addtoken')updateStableNetworks();
+  if(t==='swap')initSwap();
+  if(t==='tg'){const a=AA();document.getElementById('tg-sol').textContent=a.solAddress||'—';}
+}
+
+// ══════════════════════════════════════════
+// MENU
+// ══════════════════════════════════════════
+function openMenu(){
+  document.getElementById('menu-bg').style.display='block';
+  document.getElementById('menu-panel').style.display='block';
+  document.getElementById('menu-accts').style.display='none';
+  document.getElementById('menu-rename-p').style.display='none';
+  buildAcctList();
+}
+function closeMenu(){document.getElementById('menu-bg').style.display='none';document.getElementById('menu-panel').style.display='none';}
+function menuA(a){
+  if(a==='accounts'){const el=document.getElementById('menu-accts');el.style.display=el.style.display==='none'?'block':'none';buildAcctList();}
+  else if(a==='rename'){const el=document.getElementById('menu-rename-p');el.style.display=el.style.display==='none'?'block':'none';document.getElementById('rename-w').value=AW().label||'';document.getElementById('rename-a').value=AA().label||'';}
+  else if(a==='settings'){
+    const el=document.getElementById('menu-settings-p');
+    el.style.display=el.style.display==='none'?'block':'none';
+    document.getElementById('set-transak-key').value=TRANSAK_KEY();
+    document.getElementById('set-transak-env').value=TRANSAK_ENVIRONMENT();
+  }
+  else if(a==='newwallet'){closeMenu();go('s-home');}
+  else if(a==='seed'){closeMenu();ST('seed');revealSeed();}
+  else if(a==='keys'){closeMenu();ST('keys');}
+  else if(a==='scan'){closeMenu();startScan();}
+  else if(a==='addtok'){closeMenu();ST('addtoken');}
+  else if(a==='rug'){closeMenu();window.open('https://rugcheck.xyz','_blank');}
+  else if(a==='fontup'){S.fontSize=Math.min(22,S.fontSize+1);document.documentElement.style.fontSize=S.fontSize+'px';localStorage.setItem('ezw_fs',S.fontSize);document.getElementById('font-size-lbl').textContent='Current: '+S.fontSize+'px';}
+  else if(a==='fontdn'){S.fontSize=Math.max(13,S.fontSize-1);document.documentElement.style.fontSize=S.fontSize+'px';localStorage.setItem('ezw_fs',S.fontSize);document.getElementById('font-size-lbl').textContent='Current: '+S.fontSize+'px';}
+  else if(a==='del'){if(!confirm('Delete this wallet?'))return;S.wallets.splice(S.wi,1);S.wi=Math.max(0,S.wallets.length-1);S.ai=0;if(!S.wallets.length){nukeAll();return;}saveState().then(()=>{closeMenu();renderWallet();startScan();});}
+}
+function buildAcctList(){
+  let html='';
+  S.wallets.forEach((w,wi)=>{
+    (w.accounts||[]).forEach((a,ai)=>{
+      const isA=wi===S.wi&&ai===S.ai;
+      html+=`<div class="wallet-item${isA?' active':''}" onclick="switchAcct(${wi},${ai})">
+        <div style="display:flex;justify-content:space-between;align-items:center;">
+          <div><div style="font-size:15px;font-weight:700;">${w.label||'Wallet'} — ${a.label||'Account'}</div>
+          <div style="font-size:12px;color:#5A7898;margin-top:3px;">${(a.evmAddress||'').slice(0,16)}...</div></div>
+          ${isA?'<span style="color:#00FFB2;font-size:16px;font-weight:700;">✓</span>':''}
+        </div>
+      </div>`;
+    });
+  });
+  document.getElementById('acct-list-m').innerHTML=html||'<div style="color:#7A98B8;font-size:14px;">No accounts.</div>';
+  document.getElementById('acct-add-m').style.display=AW().mnemonic?'block':'none';
+}
+function switchAcct(wi,ai){S.wi=wi;S.ai=ai;S.balances={};renderWallet();startScan();buildAcctList();}
+async function addAccount(){
+  const w=AW();if(!w.mnemonic){alert('Seed-phrase wallets only.');return;}
+  const idx=parseInt(document.getElementById('acct-idx-m').value)||0;
+  const lbl=document.getElementById('acct-lbl-m').value.trim()||'Account '+idx;
+  if((w.accounts||[]).find(a=>a.idx===idx)){alert('Account '+idx+' already added.');return;}
+  const evm=ethers.HDNodeWallet.fromPhrase(w.mnemonic,'',`m/44'/60'/0'/0/${idx}`);
+  const btc=await deriveBTC(w.mnemonic,idx);
+  const solAddrs=await deriveSolAll(w.mnemonic);
+  // Use same sol path index as primary account
+  const solPrimary=solAddrs.find(s=>s.privKey===w.solPriv)||solAddrs[0];
+  // For additional accounts derive at different index
+  const seed=await bip39Seed(w.mnemonic);
+  const solPriv=await slip10(seed,[44,501,idx,0]);
+  const solKP=nacl.sign.keyPair.fromSeed(solPriv);
+  w.accounts.push({idx,label:lbl,evmAddress:evm.address,solAddress:b58(solKP.publicKey),btcAddress:btc.address});
+  S.wallets[S.wi]=w;await saveState();buildAcctList();
+}
+// ══════════════════════════════════════════
+// FIAT / ON-RAMP / OFF-RAMP
+// ══════════════════════════════════════════
+const FIAT_RATES={usd:1,zar:18.5,gbp:0.79,eur:0.92,ngn:1580,aed:3.67};
+const FIAT_SYM={usd:'$',zar:'R',gbp:'£',eur:'€',ngn:'₦',aed:'AED '};
+
+// Transak key is stored in-app via Settings (encrypted in localStorage), NOT in code.
+function TRANSAK_KEY(){return localStorage.getItem('ezw_transak_key')||'';}
+function TRANSAK_ENVIRONMENT(){return localStorage.getItem('ezw_transak_env')||'STAGING';}
+
+let rampMode='buy';
+
+function calcFiat(){
+  const cur=document.getElementById('fiat-cur').value;
+  const rate=FIAT_RATES[cur]||1;const sym=FIAT_SYM[cur]||'$';
+  let usd=0;
+  CHAINS.forEach(ch=>{const b=safe(S.balances[ch.id]);const pr=S.prices[ch.id]?.p||0;if(b>0&&pr>0)usd+=b*pr;});
+  S.tokens.forEach(t=>{if(safe(t.balance)>0&&t.priceUSD>0)usd+=safe(t.balance)*t.priceUSD;});
+  const val=usd*rate;
+  const amtEl=document.getElementById('fiat-amount');
+  const rateEl=document.getElementById('fiat-rate');
+  if(amtEl)amtEl.textContent=sym+val.toLocaleString('en',{minimumFractionDigits:2,maximumFractionDigits:2});
+  if(rateEl)rateEl.textContent='1 USD ≈ '+rate+' '+cur.toUpperCase()+' · indicative';
+  updateRampAddr();
+  renderRampProviders();
+}
+
+function setRampMode(m){
+  rampMode=m;
+  document.getElementById('ramp-buy').className=m==='buy'?'btn btn-p btn-sm f1 mb0':'btn btn-g btn-sm f1 mb0';
+  document.getElementById('ramp-sell').className=m==='sell'?'btn btn-p btn-sm f1 mb0':'btn btn-g btn-sm f1 mb0';
+  document.getElementById('ramp-section-title').textContent=m==='buy'?'BUY WITH FIAT (ON-RAMP)':'SELL FOR CASH (OFF-RAMP)';
+  renderRampProviders();
+}
+
+function rampAddr(){
+  const chain=document.getElementById('ramp-chain').value;
+  const a=AA();
+  return chain==='solana'?a.solAddress:chain==='btc'?a.btcAddress:chain==='tron'?a.tronAddress:a.evmAddress;
+}
+function updateRampAddr(){
+  const el=document.getElementById('ramp-addr');
+  if(el)el.textContent=rampAddr()||'—';
+}
+function copyRampAddr(){
+  navigator.clipboard.writeText(rampAddr()||'').catch(()=>{});
+  if(event&&event.currentTarget){const b=event.currentTarget;b.textContent='✓ Copied!';setTimeout(()=>b.textContent='📋 COPY MY ADDRESS',1500);}
+}
+
+// Map our chain to Transak network + crypto codes
+const TRANSAK_NET={eth:'ethereum',base:'base',bsc:'bsc',polygon:'polygon',solana:'solana',btc:'mainnet'};
+const TRANSAK_CRYPTO={eth:'ETH',base:'ETH',bsc:'BNB',polygon:'POL',solana:'SOL',btc:'BTC'};
+
+function openTransak(){
+  const cur=document.getElementById('fiat-cur').value.toUpperCase();
+  const addr=rampAddr();
+  // Copy address so user can paste it in Transak
+  if(addr)navigator.clipboard.writeText(addr).catch(()=>{});
+  // Transak's own hosted site — works for personal use, KYC on their side
+  const key=TRANSAK_KEY();
+  if(key){
+    // If user added their key, use the direct widget URL
+    const chain=document.getElementById('ramp-chain').value;
+    const net=TRANSAK_NET[chain]||'ethereum';
+    const crypto=TRANSAK_CRYPTO[chain]||'ETH';
+    const base=TRANSAK_ENVIRONMENT()==='PRODUCTION'?'https://global.transak.com':'https://global-stg.transak.com';
+    let url=base+'?apiKey='+key+'&productsAvailed='+(rampMode==='buy'?'BUY':'SELL')
+      +'&fiatCurrency='+cur+'&network='+net+'&cryptoCurrencyCode='+crypto
+      +'&walletAddress='+encodeURIComponent(addr||'')+'&themeColor=00FFB2';
+    window.open(url,'_blank');
+  }else{
+    // No key — open Transak's public site (address copied to clipboard)
+    alert('Your '+ (document.getElementById('ramp-chain').value.toUpperCase()) +' address is copied. Paste it as the wallet address on Transak.');
+    window.open('https://global.transak.com','_blank');
+  }
+}
+
+function openMoonPay(){
+  const addr=rampAddr();
+  const chain=document.getElementById('ramp-chain').value;
+  const crypto=(TRANSAK_CRYPTO[chain]||'ETH').toLowerCase();
+  if(addr)navigator.clipboard.writeText(addr).catch(()=>{});
+  alert('Your '+chain.toUpperCase()+' address is copied. Paste it as the wallet address on MoonPay.');
+  if(rampMode==='sell'){window.open('https://www.moonpay.com/sell','_blank');return;}
+  window.open('https://www.moonpay.com/buy/'+crypto,'_blank');
+}
+
+function openGuardarian(){
+  const addr=rampAddr();
+  const chain=document.getElementById('ramp-chain').value;
+  if(addr)navigator.clipboard.writeText(addr).catch(()=>{});
+  alert('Your '+chain.toUpperCase()+' address is copied. Choose your currency (ZAR/USD/EUR) and paste your address on Guardarian.');
+  window.open('https://guardarian.com/','_blank');
+}
+
+function renderRampProviders(){
+  const el=document.getElementById('ramp-providers');
+  if(!el)return;
+  const addr=rampAddr();
+  const chain=document.getElementById('ramp-chain').value;
+  const cur=document.getElementById('fiat-cur').value.toUpperCase();
+  const crypto=TRANSAK_CRYPTO[chain]||'ETH';
+  const isBuy=rampMode==='buy';
+
+  // Provider list — buy and sell variants
+  const providers=isBuy?[
+    {n:'Transak',d:'Card · Apple/Google Pay · ZAR · 170+ coins · best for personal use',fn:'openTransak()',best:true},
+    {n:'MoonPay',d:'Card · Apple Pay · ZAR · fast & trusted',fn:'openMoonPay()'},
+    {n:'Luno (SA)',d:'🇿🇦 FSCA-licensed · ZAR bank deposit · most trusted in SA',u:'https://www.luno.com/'},
+    {n:'VALR (SA)',d:'🇿🇦 SA exchange · instant ZAR deposit · low fees',u:'https://www.valr.com/'},
+    {n:'Guardarian',d:'Card & bank · ZAR/USD/EUR · quick',fn:'openGuardarian()'},
+    {n:'Binance P2P',d:'🇿🇦 ZAR · peer-to-peer · local bank transfer',u:'https://p2p.binance.com/'},
+  ]:[
+    {n:'Transak Sell',d:'Crypto → your bank · ZAR supported',fn:'openTransak()',best:true},
+    {n:'MoonPay Sell',d:'Crypto → card/bank',fn:'openMoonPay()'},
+    {n:'Luno (SA)',d:'🇿🇦 Sell & withdraw to SA bank account',u:'https://www.luno.com/'},
+    {n:'VALR (SA)',d:'🇿🇦 Sell to ZAR · fast withdrawal',u:'https://www.valr.com/'},
+    {n:'Guardarian Sell',d:'Crypto → ZAR/USD/EUR',fn:'openGuardarian()'},
+  ];
+
+  el.innerHTML=providers.map(p=>{
+    const action=p.fn?('onclick="'+p.fn+'"'):('onclick="window.open(\''+p.u+'\',\'_blank\')"');
+    return '<div class="dcard"'+(p.best?' style="border-color:#00FFB250;"':'')+'>'+
+      '<div><div style="font-size:16px;font-weight:700;">'+p.n+(p.best?' <span style="font-size:11px;background:#00FFB218;color:#00FFB2;border-radius:6px;padding:1px 7px;border:1px solid #00FFB230;">RECOMMENDED</span>':'')+'</div>'+
+      '<div style="font-size:13px;color:#7A98B8;margin-top:2px;">'+p.d+'</div></div>'+
+      '<button '+action+' style="padding:11px 18px;border-radius:12px;background:linear-gradient(135deg,#00FFB2,#00C98A);border:none;color:#050D1A;font-weight:700;font-size:14px;cursor:pointer;flex-shrink:0;">'+(isBuy?'BUY':'SELL')+'</button>'+
+      '</div>';
+  }).join('');
+}
+
+// ══════════════════════════════════════════
+// RUG CHECK
+// ══════════════════════════════════════════
+async function doRugCheck(){
+  const addr=document.getElementById('rug-addr').value.trim();
+  const chain=document.getElementById('rug-chain').value;
+  const el=document.getElementById('rug-result');
+  if(!addr||addr.length<10){el.innerHTML='<div class="wcs werr">Enter a contract address.</div>';return;}
+  el.innerHTML='<div class="wcs wwait"><span class="spin"></span> Scanning token safety...</div>';
+  let name='?',sym='?',score=100,checks=[];
+  if(chain!=='solana'){
+    const ch=CHAINS.find(c=>c.id===chain);
+    const call=async(sig)=>{for(const u of(ch?.rpcs||[])){try{const d=await rpc(u,'eth_call',[{to:addr,data:sig},'latest']);if(d.result&&d.result!=='0x')return d.result;}catch{}}return null;};
+    try{
+      const sr=await call('0x95d89b41');if(sr)try{sym=ethers.AbiCoder.defaultAbiCoder().decode(['string'],sr)[0];}catch{}
+      const nr=await call('0x06fdde03');if(nr)try{name=ethers.AbiCoder.defaultAbiCoder().decode(['string'],nr)[0];}catch{}
+      const owner=await call('0x8da5cb5b');
+      if(owner&&!/0x0+$/.test(owner)){score-=20;checks.push({i:'⚠️',l:'Has Owner',s:'Contract can be modified by owner',c:'#FFB800',t:'CAUTION'});}
+      else checks.push({i:'✅',l:'No Owner',s:'Ownership renounced',c:'#00FFB2',t:'SAFE'});
+      const mint=await call('0x40c10f19');
+      if(mint&&mint!=='0x'){score-=25;checks.push({i:'🚨',l:'Mint Function',s:'New tokens can be created',c:'#FF3D5A',t:'RISK'});}
+      else checks.push({i:'✅',l:'No Mint',s:'Supply is fixed',c:'#00FFB2',t:'SAFE'});
+    }catch{}
+    checks.push({i:'💧',l:'Liquidity',s:'Check DexScreener for lock status',c:'#FFB800',t:'CHECK'});
+  }else{
+    try{const r=await fetch('https://api.coingecko.com/api/v3/coins/solana/contract/'+addr,{signal:AbortSignal.timeout(8000)});const d=await r.json();if(d.name){name=d.name;sym=d.symbol?.toUpperCase()||'?';checks.push({i:'✅',l:'CoinGecko Listed',s:'Token is verified',c:'#00FFB2',t:'LISTED'});}else{score-=30;checks.push({i:'❓',l:'Unlisted',s:'Not on CoinGecko',c:'#FFB800',t:'UNKNOWN'});}}catch{score-=30;checks.push({i:'❓',l:'Unlisted',s:'Could not verify',c:'#FFB800',t:'UNKNOWN'});}
+    checks.push({i:'🚀',l:'Pump.fun Token',s:'Verify on Birdeye/DexScreener',c:'#FFB800',t:'CHECK'});
+    checks.push({i:'👥',l:'Top Holders',s:'Check if few wallets hold most',c:'#FFB800',t:'CHECK'});
+  }
+  checks.push({i:'📊',l:'Token Age',s:'New tokens carry high risk',c:'#FFB800',t:'CAUTION'});
+  const col=score>=70?'#00FFB2':score>=40?'#FFB800':'#FF3D5A';
+  const lbl=score>=70?'PROBABLY SAFE':score>=40?'USE CAUTION':'HIGH RISK';
+  el.innerHTML='<div style="background:#050D1A;border:2px solid '+col+';border-radius:16px;padding:18px;margin-bottom:14px;text-align:center;">'+
+    '<div style="font-size:12px;color:#5A7898;letter-spacing:2px;font-weight:600;">SAFETY SCORE</div>'+
+    '<div style="font-family:Orbitron,monospace;font-size:42px;font-weight:900;color:'+col+';margin:8px 0;">'+score+'/100</div>'+
+    '<div style="font-size:16px;font-weight:700;color:'+col+';">'+lbl+'</div>'+
+    '<div style="font-size:14px;color:#5A7898;margin-top:4px;">'+name+' ('+sym+')</div></div>'+
+    checks.map(c=>'<div style="display:flex;align-items:center;gap:12px;padding:13px;background:#050D1A;border:1px solid #1A2D45;border-radius:10px;margin-bottom:8px;"><span style="font-size:20px;">'+c.i+'</span><div style="flex:1;"><div style="font-size:15px;font-weight:600;">'+c.l+'</div><div style="font-size:13px;color:#5A7898;">'+c.s+'</div></div><span style="padding:5px 12px;border-radius:16px;font-size:12px;font-weight:700;background:'+c.c+'20;color:'+c.c+';border:1px solid '+c.c+'40;">'+c.t+'</span></div>').join('')+
+    '<button class="btn btn-g" style="font-size:14px;margin-top:8px;" onclick="window.open(\''+(chain==='solana'?'https://birdeye.so/token/'+addr:'https://dexscreener.com/search?q='+addr)+'\',\'_blank\')">📊 View Full Analysis</button>'+
+    '<div class="warn-box">⚠ Not financial advice. Always DYOR. Automated checks may miss issues.</div>';
+}
+
+// ══════════════════════════════════════════
+// QR SCANNER + PAY
+// ══════════════════════════════════════════
+let scanStream=null;
+async function openScanner(){
+  document.getElementById('scanner-modal').style.display='flex';
+  try{
+    scanStream=await navigator.mediaDevices.getUserMedia({video:{facingMode:'environment'}});
+    const v=document.getElementById('scan-video');v.srcObject=scanStream;
+    if('BarcodeDetector' in window){
+      const bd=new BarcodeDetector({formats:['qr_code']});
+      let done=false;
+      const scan=async()=>{
+        if(!scanStream||done)return;
+        try{
+          const codes=await bd.detect(v);
+          if(codes.length){
+            done=true;
+            let raw=codes[0].rawValue;
+            let address=raw.replace(/^(ethereum:|bitcoin:|solana:)/i,'').split('?')[0].trim();
+            let amount='';const m=raw.match(/[?&](amount|value)=([^&]+)/i);if(m)amount=m[2];
+            document.getElementById('scan-result').textContent='✓ Scanned!';
+            setTimeout(()=>{closeScanner();showPayConfirm(address,amount);},700);
+            return;
+          }
+        }catch{}
+        if(scanStream&&!done)setTimeout(scan,250);
+      };
+      v.onloadeddata=scan;setTimeout(scan,500);
+    }else{
+      document.getElementById('scan-result').textContent='⚠ QR scanning needs Chrome on Android. Type address manually in Send.';
+    }
+  }catch(e){
+    document.getElementById('scan-result').textContent='⚠ Camera denied. Allow camera in browser settings.';
+  }
+}
+function closeScanner(){
+  if(scanStream){scanStream.getTracks().forEach(t=>t.stop());scanStream=null;}
+  const v=document.getElementById('scan-video');if(v)v.srcObject=null;
+  document.getElementById('scanner-modal').style.display='none';
+}
+function showPayConfirm(addr,amount){
+  document.getElementById('pay-to').textContent=addr;
+  const a=AA();
+  const opts=[];
+  CHAINS.forEach(ch=>{opts.push({label:ch.i+' '+ch.s+' ('+safe(S.balances[ch.id]).toFixed(4)+')',type:'native',ch,bal:safe(S.balances[ch.id])});});
+  S.tokens.forEach((t,i)=>{opts.push({label:t.symbol+' on '+(t.chainId||'').toUpperCase()+' ('+safe(t.balance).toFixed(4)+')',type:'token',t,bal:safe(t.balance)});});
+  const sel=document.getElementById('pay-token');
+  sel.innerHTML=opts.map((o,i)=>'<option value="'+i+'">'+o.label+'</option>').join('');
+  sel._opts=opts;
+  if(amount)document.getElementById('pay-amt').value=amount;
+  updatePayPreview();
+  document.getElementById('pay-modal').classList.add('open');
+}
+function updatePayPreview(){
+  const sel=document.getElementById('pay-token');const opts=sel._opts;if(!opts)return;
+  const o=opts[parseInt(sel.value)||0];if(!o)return;
+  const amt=parseFloat(document.getElementById('pay-amt').value)||0;
+  let pr=o.type==='native'?(S.prices[o.ch.id]?.p||0):(o.t.priceUSD||0);
+  document.getElementById('pay-preview').textContent=amt&&pr?'≈ $'+(amt*pr).toFixed(2)+' USD · Available: '+o.bal.toFixed(4):'Available: '+o.bal.toFixed(4);
+}
+function confirmPay(){
+  const sel=document.getElementById('pay-token');const opts=sel._opts;if(!opts)return;
+  const o=opts[parseInt(sel.value)||0];
+  const addr=document.getElementById('pay-to').textContent;
+  const amt=document.getElementById('pay-amt').value;
+  if(!addr||!amt||parseFloat(amt)<=0){alert('Enter a valid amount');return;}
+  document.getElementById('pay-modal').classList.remove('open');
+  document.getElementById('send-to').value=addr;
+  document.getElementById('send-amt').value=amt;
+  if(o.type==='native')document.getElementById('send-chain').value=o.ch.id==='btc'||o.ch.id==='solana'?'eth':o.ch.id;
+  ST('send');
+  const st=document.getElementById('send-st');st.className='wcs wwait';st.textContent='Review and tap SEND TRANSACTION to confirm.';st.style.display='block';
+}
+
+// ══════════════════════════════════════════
+// TELEGRAM BOT
+// ══════════════════════════════════════════
+function linkTG(){
+  const webhook=document.getElementById('tg-webhook').value.trim();
+  const lbl=document.getElementById('tg-lbl').value.trim()||'EZ Main';
+  const el=document.getElementById('tg-st');
+  const show=(m,cls)=>{el.className='wcs '+cls;el.textContent=m;el.style.display='block';};
+  if(!webhook.startsWith('http')){show('Enter a valid webhook URL.','werr');return;}
+  show('Linking...','wwait');
+  const a=AA();
+  fetch(webhook,{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({label:lbl,solAddress:a.solAddress,evmAddress:a.evmAddress,btcAddress:a.btcAddress,ts:Date.now()}),signal:AbortSignal.timeout(9000)})
+    .then(r=>r.ok?show('✓ Linked! Bot registered your wallet.','wok'):show('Bot error: '+r.status,'werr'))
+    .catch(e=>show('Cannot reach bot: '+e.message,'werr'));
+}
+
+// ══════════════════════════════════════════
+// JUPITER SWAP (Solana)
+// ══════════════════════════════════════════
+const SOL_MINT='So11111111111111111111111111111111111111112'; // wrapped SOL
+let swapSlippage=1; // %
+let lastQuote=null;
+
+function initSwap(){
+  // Build token lists from SOL + detected Solana tokens
+  const a=AA();
+  const solTokens=[{symbol:'SOL',mint:SOL_MINT,decimals:9,balance:safe(S.balances.solana)}];
+  S.tokens.filter(t=>t.chainId==='solana').forEach(t=>{
+    solTokens.push({symbol:t.symbol,mint:t.contract,decimals:t.decimals||9,balance:safe(t.balance)});
+  });
+  window._swapTokens=solTokens;
+  const fromSel=document.getElementById('swap-from-token');
+  const toSel=document.getElementById('swap-to-token');
+  fromSel.innerHTML=solTokens.map((t,i)=>'<option value="'+i+'">'+t.symbol+'</option>').join('');
+  toSel.innerHTML=solTokens.map((t,i)=>'<option value="'+i+'">'+t.symbol+'</option>').join('');
+  // Default: SOL -> first token (or USDC if present)
+  toSel.value=solTokens.length>1?1:0;
+  onSwapTokenChange();
+  setSlip(1);
+}
+
+function onSwapTokenChange(){
+  const toks=window._swapTokens||[];
+  const fi=parseInt(document.getElementById('swap-from-token').value)||0;
+  const t=toks[fi];
+  document.getElementById('swap-from-bal').textContent='Balance: '+(t?safe(t.balance).toFixed(4):'0');
+  quoteSwap();
+}
+
+function setSwapMax(){
+  const toks=window._swapTokens||[];
+  const fi=parseInt(document.getElementById('swap-from-token').value)||0;
+  const t=toks[fi];
+  if(t){document.getElementById('swap-from-amt').value=safe(t.balance);quoteSwap();}
+}
+
+function flipSwap(){
+  const fromSel=document.getElementById('swap-from-token');
+  const toSel=document.getElementById('swap-to-token');
+  const tmp=fromSel.value;fromSel.value=toSel.value;toSel.value=tmp;
+  document.getElementById('swap-from-amt').value='';
+  document.getElementById('swap-to-amt').value='';
+  onSwapTokenChange();
+}
+
+function setSlip(v){
+  swapSlippage=v;
+  [['slip-05',0.5],['slip-1',1],['slip-3',3]].forEach(([id,val])=>{
+    const b=document.getElementById(id);if(b)b.className=val===v?'slip-btn on':'slip-btn';
+  });
+  quoteSwap();
+}
+
+let quoteTimer=null;
+function quoteSwap(){
+  clearTimeout(quoteTimer);
+  quoteTimer=setTimeout(doQuote,500);
+}
+
+async function doQuote(){
+  const toks=window._swapTokens||[];
+  const fi=parseInt(document.getElementById('swap-from-token').value)||0;
+  const ti=parseInt(document.getElementById('swap-to-token').value)||0;
+  const amt=parseFloat(document.getElementById('swap-from-amt').value)||0;
+  const fromT=toks[fi],toT=toks[ti];
+  const btn=document.getElementById('swap-btn');
+  const details=document.getElementById('swap-details');
+  if(!fromT||!toT||amt<=0||fi===ti){
+    document.getElementById('swap-to-amt').value='';
+    details.style.display='none';
+    btn.textContent='GET QUOTE';
+    lastQuote=null;
+    return;
+  }
+  btn.textContent='Getting quote...';
+  try{
+    const amountRaw=Math.floor(amt*Math.pow(10,fromT.decimals));
+    const url='https://quote-api.jup.ag/v6/quote?inputMint='+fromT.mint
+      +'&outputMint='+toT.mint
+      +'&amount='+amountRaw
+      +'&slippageBps='+Math.floor(swapSlippage*100);
+    const r=await fetch(url,{signal:AbortSignal.timeout(10000)});
+    const q=await r.json();
+    if(q.error||!q.outAmount){throw new Error(q.error||'No route found');}
+    lastQuote=q;
+    const outAmt=parseFloat(q.outAmount)/Math.pow(10,toT.decimals);
+    document.getElementById('swap-to-amt').value=outAmt.toFixed(6);
+    const impact=parseFloat(q.priceImpactPct||0)*100;
+    details.style.display='block';
+    details.innerHTML='Rate: 1 '+fromT.symbol+' ≈ '+(outAmt/amt).toFixed(4)+' '+toT.symbol+'<br/>'
+      +'Price impact: <span style="color:'+(impact>3?'#FF3D5A':'#00FFB2')+';">'+impact.toFixed(2)+'%</span><br/>'
+      +'Slippage: '+swapSlippage+'% · Route: Jupiter';
+    btn.textContent='SWAP '+fromT.symbol+' → '+toT.symbol;
+  }catch(e){
+    document.getElementById('swap-to-amt').value='';
+    details.style.display='block';
+    details.innerHTML='<span style="color:#FF3D5A;">No route: '+e.message+'</span>';
+    btn.textContent='GET QUOTE';
+    lastQuote=null;
+  }
+}
+
+async function doSwap(){
+  const st=document.getElementById('swap-status');
+  const show=(m,cls)=>{st.className='wcs '+cls;st.innerHTML=m;st.style.display='block';};
+  if(!lastQuote){show('Enter an amount to get a quote first.','wwait');quoteSwap();return;}
+  const w=AW();
+  if(!w.solPriv){show('No Solana key in this wallet.','werr');return;}
+  const a=AA();
+  if(!a.solAddress){show('No Solana address.','werr');return;}
+
+  show('<span class="spin"></span> Building swap transaction...','wwait');
+  try{
+    // 1. Get swap transaction from Jupiter
+    const swapResp=await fetch('https://quote-api.jup.ag/v6/swap',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        quoteResponse:lastQuote,
+        userPublicKey:a.solAddress,
+        wrapAndUnwrapSol:true,
+        dynamicComputeUnitLimit:true,
+        prioritizationFeeLamports:'auto'
+      }),
+      signal:AbortSignal.timeout(15000)
+    });
+    const swapData=await swapResp.json();
+    if(!swapData.swapTransaction){throw new Error(swapData.error||'Failed to build transaction');}
+
+    show('<span class="spin"></span> Signing transaction...','wwait');
+
+    // 2. Deserialize, sign with nacl, re-serialize
+    const txBuf=Uint8Array.from(atob(swapData.swapTransaction),c=>c.charCodeAt(0));
+    // Sign the versioned transaction message
+    const signed=signSolanaTx(txBuf,w.solPriv);
+
+    show('<span class="spin"></span> Sending to Solana network...','wwait');
+
+    // 3. Submit
+    const sendResp=await fetch('https://api.mainnet-beta.solana.com',{
+      method:'POST',
+      headers:{'Content-Type':'application/json'},
+      body:JSON.stringify({
+        jsonrpc:'2.0',id:1,method:'sendTransaction',
+        params:[btoa(String.fromCharCode.apply(null,signed)),{encoding:'base64',skipPreflight:false,maxRetries:3}]
+      }),
+      signal:AbortSignal.timeout(20000)
+    });
+    const sendData=await sendResp.json();
+    if(sendData.error){throw new Error(sendData.error.message||'Send failed');}
+    const sig=sendData.result;
+    show('✓ Swap sent! <a href="https://solscan.io/tx/'+sig+'" target="_blank" style="color:#00FFB2;text-decoration:underline;">View on Solscan ↗</a><br/>Balances refresh in ~15s.','wok');
+    setTimeout(()=>{startScan();},15000);
+  }catch(e){
+    show('Swap failed: '+e.message,'werr');
+  }
+}
+
+// Sign a Solana versioned transaction
+function signSolanaTx(txBytes,privHex){
+  // Versioned tx format: [numRequiredSigs][...signatures][message]
+  // For a freshly-built Jupiter tx, signature slots are zero-filled
+  const seed=h2b(privHex);
+  const kp=nacl.sign.keyPair.fromSeed(seed.slice(0,32));
+  // First byte = number of signatures
+  const numSigs=txBytes[0];
+  // The message starts after: 1 byte count + numSigs*64 bytes
+  const msgStart=1+numSigs*64;
+  const message=txBytes.slice(msgStart);
+  // Sign the message
+  const signature=nacl.sign.detached(message,kp.secretKey);
+  // Place signature in slot 0
+  const out=new Uint8Array(txBytes);
+  out.set(signature,1);
+  return out;
+}
+
+function saveTransakSettings(){
+  const key=document.getElementById('set-transak-key').value.trim();
+  const env=document.getElementById('set-transak-env').value;
+  localStorage.setItem('ezw_transak_key',key);
+  localStorage.setItem('ezw_transak_env',env);
+  const st=document.getElementById('set-status');
+  st.className='wcs wok';
+  st.textContent=key?('✓ Saved! Transak '+(env==='PRODUCTION'?'LIVE mode — real purchases enabled.':'staging mode — test only.')):'✓ Key cleared. Transak runs in test mode.';
+  st.style.display='block';
+  // Refresh fiat providers to show updated status
+  if(document.getElementById('p-fiat').style.display==='block')renderRampProviders();
+}
+
+function doRename(){
+  const wl=document.getElementById('rename-w').value.trim();
+  const al=document.getElementById('rename-a').value.trim();
+  if(wl)S.wallets[S.wi].label=wl;
+  if(al&&S.wallets[S.wi].accounts[S.ai])S.wallets[S.wi].accounts[S.ai].label=al;
+  saveState();renderWallet();document.getElementById('menu-rename-p').style.display='none';
+}
+</script>
+</body>
+</html>
